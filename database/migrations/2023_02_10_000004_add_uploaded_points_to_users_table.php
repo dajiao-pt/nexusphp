@@ -13,6 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
+        if (Schema::hasColumn('uploaded_points')) {
+            return;
+        }
         Schema::table('users', function (Blueprint $table) {
             $table->bigInteger('uploaded_points')->nullable()->default(0);
         });

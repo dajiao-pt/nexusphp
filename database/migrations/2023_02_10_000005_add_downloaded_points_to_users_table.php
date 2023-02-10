@@ -13,6 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
+        if (Schema::hasColumn('downloaded_points')) {
+            return;
+        }
         Schema::table('users', function (Blueprint $table) {
             $table->bigInteger('downloaded_points')->nullable()->default(0);
         });
