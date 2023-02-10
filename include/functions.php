@@ -3246,7 +3246,7 @@ function commenttable($rows, $type, $parent_id, $review = false)
 		($row["editedby"] && user_can('commanage') ? " - [<a href=\"comment.php?action=vieworiginal&amp;cid=".$row['id']."&amp;type=".$type."\">".$lang_functions['text_view_original']."</a>]" : "") . "</td><td class=\"embedded nowrap\" width=\"1%\"><a href=\"#top\"><img class=\"top\" src=\"pic/trans.gif\" alt=\"Top\" title=\"Top\" /></a>&nbsp;&nbsp;</td></tr></table></div>");
 		$avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars(trim($userRow["avatar"])) : "");
 		if (!$avatar)
-			$avatar = "pic/default_avatar.png";
+			$avatar = "pic/default_avatar.gif";
 		$text = format_comment($row["text"]);
 		$text_editby = "";
 		if ($row["editedby"]){

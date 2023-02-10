@@ -522,7 +522,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             }
         }
 
-        return getSchemeAndHttpHost() . '/pic/default_avatar.png';
+        return getSchemeAndHttpHost() . '/pic/default_avatar.gif';
 
     }
 
