@@ -297,6 +297,10 @@ $slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_t
 
 if ($user["download"] && $user["upload"])
 tr_small($lang_userdetails['row_internet_speed'], $download."&nbsp;&nbsp;&nbsp;&nbsp;".$upload."&nbsp;&nbsp;&nbsp;&nbsp;".$isp, 1);
+// 新增历史积分
+$uploaded_points = "<tr><td class=\"embedded\"><strong>上传积分</strong>:  ". mksize($user["uploaded_points"]) . "</td></tr>";
+$downloaded_points = "<tr><td class=\"embedded\"><strong>下载积分</strong>:  ". mksize($user["downloaded_points"]) . "</td></tr>";
+tr_small('历史积分', "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . $uploaded_points . $downloaded_points. "</table>", 1);
 tr_small($lang_userdetails['row_gender'], $gender, 1);
 
 if (($user['donated'] > 0 || $user['donated_cny'] > 0 )&& (user_can('userprofile') || $CURUSER["id"] == $user["id"]))
