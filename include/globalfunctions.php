@@ -1164,3 +1164,41 @@ function executeCommand($command, $format = 'string', $artisan = false, $excepti
     return $format == 'string' ? $outputString : $output;
 }
 
+function format_chat_answer($userid, $message){
+    if(str_contains($message,'{时魔}')){
+        $user = get_user_row($userid);
+        $bonusResult = calculate_seed_bonus($userid);
+        $officialAdditionalFactor = get_setting('bonus.official_addition', 0);
+        $haremFactor = get_setting('bonus.harem_addition');
+        $haremAddition = calculate_harem_addition($userid);
+        $isDonor = is_donor($user);
+        $donortimes_bonus = get_setting('bonus.donortimes');
+        $baseBonusFactor = 1;
+        if ($isDonor) {
+            $baseBonusFactor = $donortimes_bonus;
+        }
+        $baseBonus = $bonusResult['seed_bonus'] * $baseBonusFactor;
+        $totalBonus = $baseBonus + $haremAddition * $haremFactor + $bonusResult['official_bonus'] * $officialAdditionalFactor;
+        $totalBonusStr = number_format($totalBonus, 3);
+        $format_message .= '当前：' . $totalBonusStr . '/小时';
+        if ($totalBonus < 200) {
+            $format_message .= '，你肿么回事。';
+        } elseif ($totalBonus < 400) {
+            $format_message .= '，勉强勉强。';
+        } elseif ($totalBonus < 800) {
+            $format_message .= '，算你及格吧。';
+        } elseif ($totalBonus < 1600) {
+            $format_message .= '，不错嘛。';
+        } elseif ($totalBonus < 3200) {
+            $format_message .= '，可以啊。';
+        } elseif ($totalBonus < 6400) {
+            $format_message .= '，非常好。';
+        } elseif ($totalBonus < 12800) {
+            $format_message .= '，太棒了。';
+        } else {
+            $format_message .= '，大佬牛逼！！！';
+        }
+        $message = str_replace($message, "{时魔}", $format_message);
+    }
+    return $message;
+};

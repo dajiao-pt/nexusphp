@@ -76,6 +76,7 @@ $lang_functions = array
 	'text_unknown' => "Unknown",
 	'text_welcome_back' => "Welcome",
 	'text_staff_panel' => "Staff Panel",
+	'text_cyanbug_chat_settings' => "CyanBug Settings",
 	'text_site_settings' => "Site Settings",
 	'text_logout' => "logout",
 	'text_bonus' => "Bonus ",

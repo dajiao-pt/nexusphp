@@ -76,6 +76,7 @@ $lang_functions = array
 	'text_unknown' => "未知",
 	'text_welcome_back' => "欢迎回来",
 	'text_staff_panel' => "管理组面板",
+	'text_cyanbug_chat_settings' => "青虫娘设置",
 	'text_site_settings' => "站点设定",
 	'text_logout' => "退出",
 	'text_bonus' => "魔力值 ",

@@ -2658,6 +2658,7 @@ else {
                 [<a href="logout.php"><?php echo $lang_functions['text_logout'] ?></a>]
                 [<a href="usercp.php"><?php echo $lang_functions['text_user_cp'] ?></a>]
                 <?php if (get_user_class() >= UC_MODERATOR) { ?> [<a href="staffpanel.php"><?php echo $lang_functions['text_staff_panel'] ?></a>] <?php }?>
+				<?php if (get_user_class() >= UC_MODERATOR) { ?> [<a href="cyanbug-chat.php"><?php echo $lang_functions['text_cyanbug_chat_settings'] ?></a>] <?php }?>
                 <?php if (get_user_class() >= UC_SYSOP) { ?> [<a href="settings.php"><?php echo $lang_functions['text_site_settings'] ?></a>]<?php } ?>
                 [<a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0"><?php echo $lang_functions['text_bookmarks'] ?></a>]
                 <font class = 'color_bonus'><?php echo $lang_functions['text_bonus'] ?></font>[<a href="mybonus.php"><?php echo $lang_functions['text_use'] ?></a>]: <?php echo number_format($CURUSER['seedbonus'], 1)?>

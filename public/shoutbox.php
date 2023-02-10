@@ -91,6 +91,78 @@ else
 	$text=trim($_GET["shbox_text"]);
 
 	sql_query("INSERT INTO shoutbox (userid, date, text, type) VALUES (" . sqlesc($userid) . ", $date, " . sqlesc($text) . ", ".sqlesc($type).")") or sqlerr(__FILE__, __LINE__);
+
+	if(mb_substr($text,0,3)==='青虫娘'){
+		// 获取当前用户的username和passkey
+		$userInfo = \App\Models\User::query()->findOrFail($userid, ['username', 'passkey']);
+		// 截取用户输入的指令
+		$instruction = trim(mb_substr($text,4));
+		// 默认回答
+		$message = '你说的什么我听不懂啊';
+		// 根据指令查询答复
+		$chat_res = sql_query("SELECT * FROM cyanbug_chat WHERE `trigger` LIKE ".sqlesc("%".$instruction."%")." ORDER BY weight") or sqlerr(__FILE__, __LINE__);
+		$chat_row = mysql_fetch_assoc($chat_res);
+		if(!$chat_row){
+			$chat_res = sql_query("SELECT * FROM cyanbug_chat WHERE INSTR(".sqlesc($instruction).",`trigger`) ORDER BY weight") or sqlerr(__FILE__, __LINE__);
+			$chat_row = mysql_fetch_assoc($chat_res);
+		}
+		// 如果能查到就进入判断流程，查不到就直接回复默认值
+		if($chat_row){
+			$message = $chat_row['answer'];
+			// 如果含有奖励，进入奖励流程判断
+			if(boolval($chat_row['reward'])){
+				$chat_id = $chat_row['id'];
+				$reward_type = $chat_row['reward_type'];
+				$reward_interval = intval($chat_row['reward_interval']);
+				// 上次奖励时间，根据这个查询是否在间隔期内
+				$reward_time = time();
+				$last_reward_time = $reward_time-($reward_interval * 60 * 60);
+				// 查询奖励
+				$reward_res = sql_query("SELECT * FROM cyanbug_reward WHERE userid = ".$userid." and chatid = ".sqlesc($chat_id)." AND reward_date > ".$last_reward_time) or sqlerr(__FILE__, __LINE__);
+				$reward_row = mysql_fetch_assoc($reward_res);
+				// 判断是否在间隔期间内
+				if($reward_row){
+					$message = $chat_row['reward_warning'];
+				}else{
+					$reward_amount = $chat_row['reward_amount'];
+					switch($reward_type){
+						case '1':
+							sql_query("UPDATE users SET class=10, vip_added = 'yes',vip_until=NULL WHERE class<=10 and id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							break;
+						case '2':
+							$formatDate = sqlesc(date("Y-m-d H:i:s"));
+							$res = sql_query("SELECT id FROM user_metas WHERE meta_key ='PERSONALIZED_USERNAME' AND uid=".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							$umid = mysql_fetch_row($res)[0];
+							if($umid===NULL){
+								sql_query("INSERT INTO user_metas (uid,meta_key,status,created_at,updated_at) VALUES (".sqlesc($userid).",'PERSONALIZED_USERNAME',0,".$formatDate.",".$formatDate.")") or sqlerr(__FILE__, __LINE__);
+							} else {
+								sql_query("UPDATE user_metas SET status=0,deadline=NULL,meta_value=NULL, updated_at=".$formatDate." WHERE id=".$umid) or sqlerr(__FILE__, __LINE__);
+							}
+							break;
+						case '3':
+							sql_query("UPDATE users SET seedbonus=seedbonus+".$reward_amount." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							break;
+						case '4':
+							sql_query("UPDATE users SET uploaded=uploaded+".$reward_amount." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							break;
+						case '5':
+							sql_query("UPDATE users SET downloaded=downloaded+".$reward_amount." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							break;
+					}
+					// 保存奖励记录
+					sql_query("INSERT INTO cyanbug_reward (userid, chatid, reward_date, reward_amount) VALUES (" . sqlesc($userid) . ", " . sqlesc($chat_id) . ", " . sqlesc($reward_time) . ", ".sqlesc($reward_amount).")") or sqlerr(__FILE__, __LINE__);
+					// 清空用户的缓存
+					clear_user_cache($userid, $userInfo->passkey);
+				}
+			}
+			$message = format_chat_answer($userid, $message);
+		}
+		// 为回复的内容加上绿色字体
+		$message = '[color=green]@'.$userInfo->username.' '.$message.'[/color]';
+		// 默认的用户ID为99，要和下面设定用户名颜色的一致
+		sql_query("INSERT INTO shoutbox (userid, date, text, type) VALUES (" . sqlesc(99) . ", $date, " . sqlesc($message) . ", ".sqlesc($type).")") or sqlerr(__FILE__, __LINE__);
+	}
+
 	print "<script type=\"text/javascript\">parent.document.forms['shbox'].shbox_text.value='';</script>";
 }
 }
@@ -98,13 +170,13 @@ else
 $limit = ($CURUSER['sbnum'] ? $CURUSER['sbnum'] : 70);
 if ($where == "helpbox")
 {
-$sql = "SELECT * FROM shoutbox WHERE type='hb' ORDER BY date DESC LIMIT ".$limit;
+$sql = "SELECT * FROM shoutbox WHERE type='hb' ORDER BY date DESC, id DESC LIMIT ".$limit;
 }
 elseif ($CURUSER['hidehb'] == 'yes' || $showhelpbox_main != 'yes'){
-$sql = "SELECT * FROM shoutbox WHERE type='sb' ORDER BY date DESC LIMIT ".$limit;
+$sql = "SELECT * FROM shoutbox WHERE type='sb' ORDER BY date DESC, id DESC LIMIT ".$limit;
 }
 elseif ($CURUSER){
-$sql = "SELECT * FROM shoutbox ORDER BY date DESC LIMIT ".$limit;
+$sql = "SELECT * FROM shoutbox ORDER BY date DESC, id DESC LIMIT ".$limit;
 }
 else {
 die("<h1>".$lang_shoutbox['std_access_denied']."</h1>"."<p>".$lang_shoutbox['std_access_denied_note']."</p></body></html>");
