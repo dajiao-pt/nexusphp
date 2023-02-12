@@ -2281,11 +2281,19 @@ function menu ($selected = "home") {
 	global $USERUPDATESET;
 	//no this option in config.php
     $enablerequest = 'yes';
+	$cat = '';
+	if(isset($_GET['cat'])){
+		$cat = $_GET['cat'];
+	}
 	$script_name = $_SERVER["SCRIPT_FILENAME"];
 	if (preg_match("/index/i", $script_name)) {
 		$selected = "home";
 	}elseif (preg_match("/forums/i", $script_name)) {
 		$selected = "forums";
+	}elseif (preg_match("/torrents/i", $script_name) && $cat === '401') {
+		$selected = "torrents_movies";
+	}elseif (preg_match("/torrents/i", $script_name) && $cat === '402') {
+		$selected = "torrents_tvseries";
 	}elseif (preg_match("/torrents/i", $script_name)) {
 		$selected = "torrents";
 	}elseif (preg_match("/special/i", $script_name)) {
@@ -2328,7 +2336,11 @@ function menu ($selected = "home") {
             print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
         else
             print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"" . $extforumurl."\" target=\"_blank\">".$lang_functions['text_forums']."</a></li>");
-        print ("<li" . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub-menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a></li>");
+		// 新增电影分类
+		print ("<li" . ($selected == "torrents_movies" ? " class=\"selected\"" : "") . "><a href=\"torrents.php?cat=401\" rel='sub-menu'>".$lang_functions['text_torrents_movies']."</a></li>");
+		// 新增电视剧
+		print ("<li" . ($selected == "torrents_tvseries" ? " class=\"selected\"" : "") . "><a href=\"torrents.php?cat=402\" rel='sub-menu'>".$lang_functions['text_torrents_tvseries']."</a></li>");
+		print ("<li" . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub-menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a></li>");
         if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
         if ($enableoffer == 'yes')
