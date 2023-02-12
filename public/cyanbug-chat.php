@@ -131,7 +131,12 @@ while ($type_row = mysql_fetch_array($type_arr)) {
     $type = $type_row[1];
     $type_map[$id] = $type;
 }
-$query = "SELECT * FROM cyanbug_chat ";
+
+// 添加分页功能
+$perPage = 10;
+$total = get_row_count('cyanbug_chat');
+list($paginationTop, $paginationBottom, $limit) = pager($perPage, $total, "?");
+$query = "SELECT * FROM cyanbug_chat order by id asc $limit";
 $sql = sql_query($query);
 while ($row = mysql_fetch_array($sql)) {
     $id = $row['id'];
@@ -156,7 +161,7 @@ while ($row = mysql_fetch_array($sql)) {
     </tr>
     <?php
 }
-print("</table>");
+print("</table>".$paginationBottom);
 end_main_frame();
 
 function formatLenght($str,$len){

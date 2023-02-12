@@ -30,3 +30,4 @@ auth.json
 /public/attachments
 /public/bitbucket
 install.lock
+/torrents
