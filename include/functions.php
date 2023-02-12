@@ -2589,7 +2589,7 @@ else
 		}
 }
 if ($enabledonation == 'yes'){?>
-			<a href="donate.php"><img src="<?php echo get_forum_pic_folder()?>/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
+			<a style="margin-left: -100px;position: absolute;" href="donate.php"><img src="<?php echo get_forum_pic_folder()?>/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
 <?php
 }
 ?>
