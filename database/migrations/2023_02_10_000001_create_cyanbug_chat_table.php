@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('name', 255)->nullable(false);
             $table->integer('weight')->nullable(false)->default(0);
             $table->string('trigger', 255)->nullable(false);
-            $table->string('answer', 255)->nullable(false);
+            $table->string('answer', 4000)->nullable(false);
             $table->boolean('reward')->nullable(false)->default(0);
             $table->bigInteger('reward_type')->nullable(true)->default(0);
             $table->integer('reward_interval')->nullable(true);

