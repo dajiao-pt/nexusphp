@@ -38,7 +38,7 @@ if (isset($_GET['action'])) {
             <tr><td class=rowhead>名称</td><td><input type=text name=name size=80 value=" . (isset($row['name'])?$row['name']:'') . "></td></tr>
             <tr><td class=rowhead>权重</td><td><input type=number name=weight size=80 value=" . (isset($row['weight'])?$row['weight']:'') . "></td></tr>
             <tr><td class=rowhead>触发词</td><td><input type=text name=trigger size=80 value=" .(isset( $row['trigger'])? $row['trigger']:'') . "></td></tr>
-            <tr><td class=rowhead>回复</td><td><textarea type=textarea style='resize: none' name=answer rows=4 cols=80>".(isset($row['answer'])?$row['answer']:'')."</textarea></td></tr>
+            <tr><td class=rowhead>回复</td><td><textarea type=textarea style='resize: vertical' name=answer rows=8 cols=80>".(isset($row['answer'])?$row['answer']:'')."</textarea></td></tr>
             <tr><td class=rowhead>含奖励</td><td><input type=checkbox name=reward size=40 " . ((isset($row['reward'])?$row['reward']:'')?'checked=checked':'') . "></td></tr>
             <tr><td class=rowhead>奖励类型</td><td><select type=text name=reward_type><option value=''>未选择</option>";
 
