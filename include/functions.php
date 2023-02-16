@@ -2286,10 +2286,6 @@ function menu ($selected = "home") {
 		$selected = "home";
 	}elseif (preg_match("/forums/i", $script_name)) {
 		$selected = "forums";
-	}elseif (preg_match("/torrents/i", $script_name) && $cat === '401') {
-		$selected = "torrents_movies";
-	}elseif (preg_match("/torrents/i", $script_name) && $cat === '402') {
-		$selected = "torrents_tvseries";
 	}elseif (preg_match("/torrents/i", $script_name)) {
 		$selected = "torrents";
 	}elseif (preg_match("/special/i", $script_name)) {
@@ -2337,8 +2333,7 @@ function menu ($selected = "home") {
 		."<ul class='sub_menu'>
 		<li><a href=\"torrents.php?cat=401\" >".$lang_functions['text_torrents_movies']."</a></li>
 		<li><a href=\"torrents.php?cat=402\" >".$lang_functions['text_torrents_tvseries']."</a></li>
-		</ul>"
-		."</li>");
+		</ul></li>");
 		if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
         if ($enableoffer == 'yes')
@@ -2354,8 +2349,10 @@ function menu ($selected = "home") {
         if (user_can('log')) {
             print ("<li" . ($selected == "log" ? " class=\"selected\"" : "") . "><a href=\"log.php\">".$lang_functions['text_log']."</a></li>");
         }
-        print ("<li" . ($selected == "rules" ? " class=\"selected\"" : "") . "><a href=\"rules.php\">".$lang_functions['text_rules']."</a></li>");
-        print ("<li" . ($selected == "faq" ? " class=\"selected\"" : "") . "><a href=\"faq.php\">".$lang_functions['text_faq']."</a></li>");
+        print ("<li" . ($selected == "rules" ? " class=\"selected\"" : "") . "><a href=\"rules.php\" rel='sub_menu'>".$lang_functions['text_rules']."</a>".
+		"<ul class='sub_menu'>
+		<li><a href=\"faq.php\" >".$lang_functions['text_faq']."</a></li>
+		</ul></li>");
         if (user_can('staffmem')) {
             print ("<li" . ($selected == "staff" ? " class=\"selected\"" : "") . "><a href=\"staff.php\">".$lang_functions['text_staff']."</a></li>");
         }
