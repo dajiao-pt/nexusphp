@@ -2666,28 +2666,48 @@ else {
 	<td><table width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
 		<td class="bottom" align="left"><image src='<?php echo get_user_avatar()?>' style="width:50px;border-radius:25px;" /></td>
 		<td class="bottom" align="left">
-            <span class="medium">
-                <?php echo $lang_functions['text_welcome_back'] ?>, <?php echo get_username($CURUSER['id'])?>
-                [<a href="logout.php"><?php echo $lang_functions['text_logout'] ?></a>]
-                [<a href="usercp.php"><?php echo $lang_functions['text_user_cp'] ?></a>]
-                <?php if (get_user_class() >= UC_MODERATOR) { ?> [<a href="staffpanel.php"><?php echo $lang_functions['text_staff_panel'] ?></a>] <?php }?>
-				<?php if (get_user_class() >= UC_MODERATOR) { ?> [<a href="cyanbug-chat.php"><?php echo $lang_functions['text_cyanbug_chat_settings'] ?></a>] <?php }?>
-                <?php if (get_user_class() >= UC_SYSOP) { ?> [<a href="settings.php"><?php echo $lang_functions['text_site_settings'] ?></a>]<?php } ?>
-                [<a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0"><?php echo $lang_functions['text_bookmarks'] ?></a>]
-                <font class = 'color_bonus'><?php echo $lang_functions['text_bonus'] ?></font>[<a href="mybonus.php"><?php echo $lang_functions['text_use'] ?></a>]: <?php echo number_format($CURUSER['seedbonus'], 1)?>
-                <?php if($attendance){ printf(' <a href="attendance.php" class="">'.$lang_functions['text_attended'].'</a>', $attendance->points, $CURUSER['attendance_card']); }else{ printf(' <a href="attendance.php" class="faqlink">%s</a>', $lang_functions['text_attendance']);}?>
-                <a href="medal.php">[<?php echo nexus_trans('medal.label')?>]</a>
-                <font class = 'color_invite'><?php echo $lang_functions['text_invite'] ?></font>[<a href="invite.php?id=<?php echo $CURUSER['id']?>"><?php echo $lang_functions['text_send'] ?></a>]: <?php echo sprintf('%s(%s)', $CURUSER['invites'], \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('invitee', '')->where('expired_at', '>', now())->count())?>
-                <?php if(get_user_class() >= \App\Models\User::CLASS_ADMINISTRATOR) printf('[<a href="%s" target="_blank">%s</a>]', nexus_env('FILAMENT_PATH', 'nexusphp'), $lang_functions['text_management_system'])?>
-                <br />
-	            <font class="color_ratio"><?php echo $lang_functions['text_ratio'] ?></font> <?php echo $ratio?>
-                <font class='color_uploaded'><?php echo $lang_functions['text_uploaded'] ?></font> <?php echo mksize($CURUSER['uploaded'])?>
-                <font class='color_downloaded'> <?php echo $lang_functions['text_downloaded'] ?></font> <?php echo mksize($CURUSER['downloaded'])?>
-                <font class='color_active'><?php echo $lang_functions['text_active_torrents'] ?></font> <img class="arrowup" alt="Torrents seeding" title="<?php echo $lang_functions['title_torrents_seeding'] ?>" src="pic/trans.gif" /><?php echo $activeseed?>  <img class="arrowdown" alt="Torrents leeching" title="<?php echo $lang_functions['title_torrents_leeching'] ?>" src="pic/trans.gif" /><?php echo $activeleech?>&nbsp;&nbsp;
-                <font class='color_connectable'><?php echo $lang_functions['text_connectable'] ?></font><?php echo $connectable?> <?php echo maxslots();?>
-                <?php if(\App\Models\HitAndRun::getIsEnabled()) { ?><font class='color_bonus'>H&R: </font> <?php echo sprintf('[<a href="myhr.php">%s</a>]', (new \App\Repositories\HitAndRunRepository())->getStatusStats($CURUSER['id']))?><?php }?>
-                <?php if(\App\Models\Claim::getConfigIsEnabled()) { ?><font class='color_bonus'><?php echo $lang_functions['menu_claim']?></font> <?php echo sprintf('[<a href="claim.php?uid=%s">%s</a>]', $CURUSER['id'], (new \App\Repositories\ClaimRepository())->getStats($CURUSER['id']))?><?php }?>
-            </span>
+            <div class="medium">
+				<div>
+					<!-- 欢迎词和用户名 -->
+					<?php echo $lang_functions['text_welcome_back'] ?>, <?php echo get_username($CURUSER['id'])?>
+					<!-- 退出 -->
+					<a class='nav-btn' href="logout.php">[<?php echo $lang_functions['text_logout'] ?>]</a>
+					<font class="color_ratio"><?php echo $lang_functions['text_ratio'] ?></font> <?php echo $ratio?>
+                	<font class='color_uploaded'><?php echo $lang_functions['text_uploaded'] ?></font> <?php echo mksize($CURUSER['uploaded'])?>
+                	<font class='color_downloaded'> <?php echo $lang_functions['text_downloaded'] ?></font> <?php echo mksize($CURUSER['downloaded'])?>
+                	<font class='color_active'><?php echo $lang_functions['title_torrents_seeding'] ?></font>
+					<!-- 正在上传 -->
+					<img class="arrowup" alt="Torrents seeding" title="<?php echo $lang_functions['title_torrents_seeding'] ?>" src="pic/trans.gif" /><?php echo $activeseed?>  
+					<font class='color_active'><?php echo $lang_functions['title_torrents_leeching'] ?></font>
+					<!-- 正在下载 -->
+					<img class="arrowdown" alt="Torrents leeching" title="<?php echo $lang_functions['title_torrents_leeching'] ?>" src="pic/trans.gif" /><?php echo $activeleech?>&nbsp;&nbsp;
+                	<font class='color_connectable'><?php echo $lang_functions['text_connectable'] ?></font><?php echo $connectable?> <?php echo maxslots();?>
+                	<?php if(\App\Models\HitAndRun::getIsEnabled()) { ?><font class='color_bonus'>H&R: </font> <?php echo sprintf('[<a class="nav-btn" href="myhr.php">%s</a>]', (new \App\Repositories\HitAndRunRepository())->getStatusStats($CURUSER['id']))?><?php }?>
+                	<?php if(\App\Models\Claim::getConfigIsEnabled()) { ?><font class='color_bonus'><?php echo $lang_functions['menu_claim']?></font> <?php echo sprintf('[<a href="claim.php?uid=%s">%s</a>]', $CURUSER['id'], (new \App\Repositories\ClaimRepository())->getStats($CURUSER['id']))?><?php }?>
+				</div>
+				<div style="margin-top:5px">
+					<!-- 控制面板 -->
+					<a class='nav-btn' href="usercp.php">[<?php echo $lang_functions['text_user_cp'] ?>]</a>
+					<!-- 管理组面板 -->
+                	<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="staffpanel.php">[<?php echo $lang_functions['text_staff_panel'] ?>]</a><?php }?>
+					<!-- 青虫娘设置 -->
+					<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="cyanbug-chat.php">[<?php echo $lang_functions['text_cyanbug_chat_settings'] ?>]</a><?php }?>
+					<!-- 站点设置 -->
+                	<?php if (get_user_class() >= UC_SYSOP) { ?><a class='nav-btn' href="settings.php">[<?php echo $lang_functions['text_site_settings'] ?>]</a><?php } ?>
+					<!-- 收藏 -->
+                	<a class='nav-btn' href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">[<?php echo $lang_functions['text_bookmarks'] ?>]</a>
+					<!-- 魔力相关 -->
+                	<a class='nav-btn' href="mybonus.php">[<?php echo ($lang_functions['text_bonus'].$lang_functions['text_use'].":".number_format($CURUSER['seedbonus'], 1)) ?>]</a>
+					<!-- 签到信息 -->
+                	<?php if($attendance){ printf(' <a class="nav-btn" href="attendance.php" class="">'.$lang_functions['text_attended'].'</a>', $attendance->points, $CURUSER['attendance_card']); }else{ printf('<a href="attendance.php" class="nav-btn">%s</a>', $lang_functions['text_attendance']);}?>
+					<!-- 勋章 -->
+                	<a class='nav-btn' href="medal.php">[<?php echo nexus_trans('medal.label')?>]</a>
+					<!-- 邀请 -->
+                	<a class='nav-btn' href="invite.php?id=<?php echo $CURUSER['id']?>">[<?php echo $lang_functions['text_invite'].$lang_functions['text_send'].':'.sprintf('%s(%s)', $CURUSER['invites'], \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('invitee', '')->where('expired_at', '>', now())->count()) ?>]</a>
+					<!-- 管理系统 -->
+                	<?php if(get_user_class() >= \App\Models\User::CLASS_ADMINISTRATOR) printf('<a class="nav-btn" href="%s" target="_blank">[%s]</a>', nexus_env('FILAMENT_PATH', 'nexusphp'), $lang_functions['text_management_system'])?>
+				</div>
+			</div>
         </td>
                 <?php if(SearchBox::isSpecialEnabled() && get_setting('main.enable_global_search') == 'yes'){?>
         <td class="bottom" align="left" style="border: none">

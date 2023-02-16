@@ -283,17 +283,17 @@ font.gray
 }
 a:link
 {
-	color: #000000;
+	/* color: #000000; */
 	text-decoration: none
 }
 a:visited
 {
-	color: #000000;
+	/* color: #000000; */
 	text-decoration: none
 }
 a:hover
 {
-	color: #008c00
+	color: cyan
 }
 a.index
 {
@@ -600,12 +600,12 @@ A.Peasant_Name:visited{color: #708090}
 
 .color_bonus{color: #339933}
 .color_invite{color: #339933}
-.color_slots{color: #339933}
+.color_slots{color: darkcyan}
 .color_downloaded{color: #8b0000}
 .color_uploaded{color: #0000f6}
-.color_ratio{color: #339933}
-.color_active{color: #339933}
-.color_connectable{color: #339933}
+.color_ratio{color: darkcyan}
+.color_active{color: darkcyan}
+.color_connectable{color: darkcyan}
 
 .logo
 {
@@ -636,3 +636,20 @@ A.Peasant_Name:visited{color: #708090}
 .recommended{color:#820084}
 .new{color:#ff0000}
 .striking{color:#ff0000}
+
+.nav-btn{
+    background: darkcyan;
+    border: .5px solid var(--theme-primary-sys-primary);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-right: 4px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    color: white;
+}
+
+.nav-btn-red{
+	background-color: green;
+}
