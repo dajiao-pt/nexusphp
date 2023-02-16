@@ -2664,6 +2664,7 @@ else {
 
 <table id="info_block" cellpadding="4" cellspacing="0" border="0" width="100%"><tr>
 	<td><table width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
+		<td class="bottom" align="left"><image src='<?php echo get_user_avatar()?>' style="width:50px;border-radius:25px;" /></td>
 		<td class="bottom" align="left">
             <span class="medium">
                 <?php echo $lang_functions['text_welcome_back'] ?>, <?php echo get_username($CURUSER['id'])?>

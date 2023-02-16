@@ -1207,3 +1207,14 @@ function format_chat_answer($userid, $message){
     }
     return $message;
 };
+
+function get_user_avatar(){
+    global $CURUSER;
+    $userid = $CURUSER["id"];
+    $userRow = get_user_row($userid);
+    $avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars(trim($CURUSER["avatar"])) : "");
+    if (!$avatar){
+        $avatar = "pic/default_avatar.gif";
+    }
+    return $avatar;
+}
