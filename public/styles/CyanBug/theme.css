@@ -283,12 +283,12 @@ font.gray
 }
 a:link
 {
-	/* color: #000000; */
+	color: #000000;
 	text-decoration: none
 }
 a:visited
 {
-	/* color: #000000; */
+	color: #000000;
 	text-decoration: none
 }
 a:hover
@@ -637,7 +637,7 @@ A.Peasant_Name:visited{color: #708090}
 .new{color:#ff0000}
 .striking{color:#ff0000}
 
-.nav-btn{
+.nav-btn {
     background: darkcyan;
     border: .5px solid var(--theme-primary-sys-primary);
     border-radius: 4px;
@@ -650,6 +650,16 @@ A.Peasant_Name:visited{color: #708090}
     color: white;
 }
 
-.nav-btn-red{
-	background-color: green;
+.nav-btn:link{
+	color:#fff;
+	text-decoration: none;
+}
+
+.nav-btn:visited{
+	color:#fff;
+	text-decoration: none;
+}
+.nav-btn:hover
+{
+	color: cyan
 }
