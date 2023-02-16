@@ -1167,18 +1167,7 @@ function executeCommand($command, $format = 'string', $artisan = false, $excepti
 function format_chat_answer($userid, $message){
     $user = get_user_row($userid);
     if(str_contains($message,'[mybonus]')){
-        $bonusResult = calculate_seed_bonus($userid);
-        $officialAdditionalFactor = get_setting('bonus.official_addition', 0);
-        $haremFactor = get_setting('bonus.harem_addition');
-        $haremAddition = calculate_harem_addition($userid);
-        $isDonor = is_donor($user);
-        $donortimes_bonus = get_setting('bonus.donortimes');
-        $baseBonusFactor = 1;
-        if ($isDonor) {
-            $baseBonusFactor = $donortimes_bonus;
-        }
-        $baseBonus = $bonusResult['seed_bonus'] * $baseBonusFactor;
-        $totalBonus = $baseBonus + $haremAddition * $haremFactor + $bonusResult['official_bonus'] * $officialAdditionalFactor;
+        $totalBonus = get_hourly_bonus();
         $totalBonusStr = number_format($totalBonus, 3);
         $format_message = '';
         $format_message .= '当前：' . $totalBonusStr . '/小时';
@@ -1207,6 +1196,22 @@ function format_chat_answer($userid, $message){
     }
     return $message;
 };
+
+function get_hourly_bonus($userid){
+    $user = get_user_row($userid);
+    $bonusResult = calculate_seed_bonus($userid);
+    $officialAdditionalFactor = get_setting('bonus.official_addition', 0);
+    $haremFactor = get_setting('bonus.harem_addition');
+    $haremAddition = calculate_harem_addition($userid);
+    $isDonor = is_donor($user);
+    $donortimes_bonus = get_setting('bonus.donortimes');
+    $baseBonusFactor = 1;
+    if ($isDonor) {
+        $baseBonusFactor = $donortimes_bonus;
+    }
+    $baseBonus = $bonusResult['seed_bonus'] * $baseBonusFactor;
+    return $baseBonus + $haremAddition * $haremFactor + $bonusResult['official_bonus'] * $officialAdditionalFactor;
+}
 
 function get_user_avatar(){
     global $CURUSER;

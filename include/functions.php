@@ -2669,7 +2669,7 @@ else {
             <div class="medium">
 				<div>
 					<!-- 欢迎词和用户名 -->
-					<?php echo $lang_functions['text_welcome_back'] ?>, <?php echo get_username($CURUSER['id'])?>
+					<?php echo get_username($CURUSER['id'])?>
 					<!-- 退出 -->
 					<a class='nav-btn' href="logout.php">[<?php echo $lang_functions['text_logout'] ?>]</a>
 					<font class="color_ratio"><?php echo $lang_functions['text_ratio'] ?></font> <?php echo $ratio?>
@@ -2680,8 +2680,12 @@ else {
 					<img class="arrowup" alt="Torrents seeding" title="<?php echo $lang_functions['title_torrents_seeding'] ?>" src="pic/trans.gif" /><?php echo $activeseed?>  
 					<font class='color_active'><?php echo $lang_functions['title_torrents_leeching'] ?></font>
 					<!-- 正在下载 -->
-					<img class="arrowdown" alt="Torrents leeching" title="<?php echo $lang_functions['title_torrents_leeching'] ?>" src="pic/trans.gif" /><?php echo $activeleech?>&nbsp;&nbsp;
-                	<font class='color_connectable'><?php echo $lang_functions['text_connectable'] ?></font><?php echo $connectable?> <?php echo maxslots();?>
+					<img class="arrowdown" alt="Torrents leeching" title="<?php echo $lang_functions['title_torrents_leeching'] ?>" src="pic/trans.gif" /><?php echo $activeleech?>
+					<!-- 时魔显示 -->
+                	<font class='color_mybonus'><?php echo $lang_functions['text_current_hour_bonus'] ?></font><?php echo number_format(get_hourly_bonus($CURUSER['id']),3) ?>
+					<!-- 可连接和连接数 -->
+					<font class='color_connectable'><?php echo $lang_functions['text_connectable'] ?></font><?php echo $connectable?> <?php echo maxslots();?>
+					<!-- H&R -->
                 	<?php if(\App\Models\HitAndRun::getIsEnabled()) { ?><font class='color_bonus'>H&R: </font> <?php echo sprintf('[<a class="nav-btn" href="myhr.php">%s</a>]', (new \App\Repositories\HitAndRunRepository())->getStatusStats($CURUSER['id']))?><?php }?>
                 	<?php if(\App\Models\Claim::getConfigIsEnabled()) { ?><font class='color_bonus'><?php echo $lang_functions['menu_claim']?></font> <?php echo sprintf('[<a href="claim.php?uid=%s">%s</a>]', $CURUSER['id'], (new \App\Repositories\ClaimRepository())->getStats($CURUSER['id']))?><?php }?>
 				</div>
