@@ -506,7 +506,7 @@ ul.menu
 }
 ul.menu li
 {
-	display: inline;
+	display: inline-block;
 	margin-left: 0px;
 	margin-right: 0px;
 }
@@ -545,17 +545,35 @@ ul.menu li a:active
 {
 	color: #2d2b2b;
 }
-ul.menu li.selected a
+ul.menu>li.selected>a
 {
 	background-image: url(./shadeactive.gif);
 	background-color: #72b5ec;
 }
-ul.menu li.selected a:hover
+ul.menu>li.selected>a:hover
 {
 	background: url(./shadehover.gif) repeat-x left top;
 	background-color: #72b5ec;
 	text-decoration: underline;
 }
+
+ul.menu li:hover ul{
+	display: block;
+}
+
+ul.menu li ul{
+	margin: 0;
+	padding: 0;
+	display: none;
+	position: absolute;
+}
+
+ul.menu li ul li{
+	margin: 0;
+	padding: 0;
+	display: block;
+}
+
 .listitem
 {
 	margin-left: 10px;

@@ -528,7 +528,7 @@ ul.menu li:hover ul{
 	display: block;
 }
 
-.sub_menu{
+ul.menu li ul{
 	margin: 0;
 	padding: 0;
 	display: none;

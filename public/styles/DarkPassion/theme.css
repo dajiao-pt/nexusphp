@@ -483,7 +483,7 @@ ul.menu
 }
 ul.menu li
 {
-	display: inline;
+	display: inline-block;
 	margin-left: 0px;
 	margin-right: 0px;
 }
@@ -519,16 +519,34 @@ ul.menu li a:active
 {
 	color: #ffffff;
 }
-ul.menu li.selected a
+ul.menu>li.selected>a
 {
 	background-image: none;
 	background-color: #4d5e6d;
 }
-ul.menu li.selected a:hover
+ul.menu>li.selected>a:hover
 {
 	background-image: none;
 	background-color: #4d5e6d;
 }
+
+ul.menu li:hover ul{
+	display: block;
+}
+
+ul.menu li ul{
+	margin: 0;
+	padding: 0;
+	display: none;
+	position: absolute;
+}
+
+ul.menu li ul li{
+	margin: 0;
+	padding: 0;
+	display: block;
+}
+
 .listitem
 {
 	margin-left: 10px;

@@ -520,7 +520,7 @@ ul.menu
 }
 ul.menu li
 {
-	display: inline;
+	display: inline-block;
 	margin-left: 0px;
 	margin-right: 0px;
 }
@@ -539,6 +539,7 @@ ul.menu li a
 	font-variant: normal;
 	text-align: center;
 	display: inline-block;
+	transition: .2s linear
 }
 ul.menu li a:link
 {
@@ -557,15 +558,33 @@ ul.menu li a:active
 {
 	color: #2d2b2b;
 }
-ul.menu li.selected a
+ul.menu>li.selected>a
 {
 	background-image: url(./shadeactive.gif);
 	background-color: #8a8a8a;
 }
-ul.menu li.selected a:hover
+ul.menu>li.selected>a:hover
 {
 	text-decoration: none;
 }
+
+ul.menu li:hover ul{
+	display: block;
+}
+
+ul.menu li ul{
+	margin: 0;
+	padding: 0;
+	display: none;
+	position: absolute;
+}
+
+ul.menu li ul li{
+	margin: 0;
+	padding: 0;
+	display: block;
+}
+
 .listitem
 {
 	margin-left: 10px;
