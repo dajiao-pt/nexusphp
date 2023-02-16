@@ -98,7 +98,8 @@ h2
 	margin-bottom: 0px;
 	padding-bottom: 3px;
 	padding-top: 3px;
-	background-color: #006600;
+	color:#e2e1e4;
+	background-color: darkcyan;
 	background-repeat: repeat;
 }
 h2.transparentbg
@@ -473,18 +474,18 @@ ul.menu
 }
 ul.menu li
 {
-	display: inline;
+	display: inline-block;
 	margin-left: 0px;
 	margin-bottom: 0px;
 }
 ul.menu li a
 {
 	color: #ffffff;
-	background-color: #00aa00;
-	border-color: green green #00aa00;
-	border-style: solid;
+	background-color: #346c9c;
+	/* border-color: green green #00aa00; */
+	/* border-style: solid; */
 	border-width: 1px;
-	margin-right: 1px;
+	/* margin-right: 1px; */
 	padding: 3px 7px;
 	text-decoration: none;
 	font-style: normal;
@@ -493,6 +494,7 @@ ul.menu li a
 	font-variant: normal;
 	text-align: center;
 	display: inline-block;
+	transition: .2s linear
 }
 ul.menu li a:link
 {
@@ -504,7 +506,7 @@ ul.menu li a:visited
 }
 ul.menu li a:hover
 {
-	background-color: #00ff00;
+	background-color: darkslateblue;
 }
 ul.menu li a:active
 {
@@ -512,15 +514,33 @@ ul.menu li a:active
 }
 ul.menu li.selected a
 {
-	background-color: #336633;
+	background-color: darkcyan;
 	background-image: none;
-	border: 1px solid #00aa00;
+	/* border: 1px solid #00aa00; */
 	color: #ffffff;
 }
 ul.menu li.selected a:hover
 {
-	background-color: #336633;
+	background-color: darkslateblue;
 }
+
+ul.menu li:hover ul{
+	display: block;
+}
+
+.sub_menu{
+	margin: 0;
+	padding: 0;
+	display: none;
+	position: absolute;
+}
+
+ul.menu li ul li{
+	margin: 0;
+	padding: 0;
+	display: block;
+}
+
 .listitem
 {
 	margin-left: 10px;

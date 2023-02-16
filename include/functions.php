@@ -2281,10 +2281,6 @@ function menu ($selected = "home") {
 	global $USERUPDATESET;
 	//no this option in config.php
     $enablerequest = 'yes';
-	$cat = '';
-	if(isset($_GET['cat'])){
-		$cat = $_GET['cat'];
-	}
 	$script_name = $_SERVER["SCRIPT_FILENAME"];
 	if (preg_match("/index/i", $script_name)) {
 		$selected = "home";
@@ -2332,16 +2328,18 @@ function menu ($selected = "home") {
         $specialSectionName = get_searchbox_value(get_setting('main.specialcat'), 'section_name');
         print ("<ul id=\"mainmenu\" class=\"menu\">");
         print ("<li" . ($selected == "home" ? " class=\"selected\"" : "") . "><a href=\"index.php\">" . $lang_functions['text_home'] . "</a></li>");
-        if ($enableextforum != 'yes')
-            print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
-        else
+        if ($enableextforum != 'yes'){
+			print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
+		} else {
             print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"" . $extforumurl."\" target=\"_blank\">".$lang_functions['text_forums']."</a></li>");
-		// 新增电影分类
-		print ("<li" . ($selected == "torrents_movies" ? " class=\"selected\"" : "") . "><a href=\"torrents.php?cat=401\" rel='sub-menu'>".$lang_functions['text_torrents_movies']."</a></li>");
-		// 新增电视剧
-		print ("<li" . ($selected == "torrents_tvseries" ? " class=\"selected\"" : "") . "><a href=\"torrents.php?cat=402\" rel='sub-menu'>".$lang_functions['text_torrents_tvseries']."</a></li>");
-		print ("<li" . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub-menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a></li>");
-        if ($enablespecial == 'yes' && user_can('view_special_torrent'))
+		}
+		print ("<li " . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub_menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a>"
+		."<ul class='sub_menu'>
+		<li class='sub_menu_item'><a href=\"torrents.php?cat=401\" >".$lang_functions['text_torrents_movies']."</a></li>
+		<li class='sub_menu_item'><a href=\"torrents.php?cat=402\" >".$lang_functions['text_torrents_tvseries']."</a></li>
+		</ul>"
+		."</li>");
+		if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
         if ($enableoffer == 'yes')
             print ("<li" . ($selected == "offers" ? " class=\"selected\"" : "") . "><a href=\"offers.php\">".$lang_functions['text_offers']."</a></li>");
@@ -2664,14 +2662,14 @@ else {
 
 <table id="info_block" cellpadding="4" cellspacing="0" border="0" width="100%"><tr>
 	<td><table width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
-		<td class="bottom" align="left"><image src='<?php echo get_user_avatar()?>' style="width:50px;border-radius:25px;" /></td>
+		<td class="bottom" align="left"><image src='<?php echo get_user_avatar()?>' style="width:50px;border-radius:25px;margin-right:3px" /></td>
 		<td class="bottom" align="left">
             <div class="medium">
 				<div>
 					<!-- 欢迎词和用户名 -->
 					<?php echo get_username($CURUSER['id'])?>
 					<!-- 退出 -->
-					<a class='nav-btn' href="logout.php">[<?php echo $lang_functions['text_logout'] ?>]</a>
+					<a class='nav-btn' href="logout.php"><?php echo $lang_functions['text_logout'] ?></a>
 					<font class="color_ratio"><?php echo $lang_functions['text_ratio'] ?></font> <?php echo $ratio?>
                 	<font class='color_uploaded'><?php echo $lang_functions['text_uploaded'] ?></font> <?php echo mksize($CURUSER['uploaded'])?>
                 	<font class='color_downloaded'> <?php echo $lang_functions['text_downloaded'] ?></font> <?php echo mksize($CURUSER['downloaded'])?>
@@ -2691,25 +2689,25 @@ else {
 				</div>
 				<div style="margin-top:5px">
 					<!-- 控制面板 -->
-					<a class='nav-btn' href="usercp.php">[<?php echo $lang_functions['text_user_cp'] ?>]</a>
+					<a class='nav-btn' href="usercp.php"><?php echo $lang_functions['text_user_cp'] ?></a>
 					<!-- 管理组面板 -->
-                	<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="staffpanel.php">[<?php echo $lang_functions['text_staff_panel'] ?>]</a><?php }?>
+                	<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="staffpanel.php"><?php echo $lang_functions['text_staff_panel'] ?></a><?php }?>
 					<!-- 青虫娘设置 -->
-					<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="cyanbug-chat.php">[<?php echo $lang_functions['text_cyanbug_chat_settings'] ?>]</a><?php }?>
+					<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="cyanbug-chat.php"><?php echo $lang_functions['text_cyanbug_chat_settings'] ?></a><?php }?>
 					<!-- 站点设置 -->
-                	<?php if (get_user_class() >= UC_SYSOP) { ?><a class='nav-btn' href="settings.php">[<?php echo $lang_functions['text_site_settings'] ?>]</a><?php } ?>
+                	<?php if (get_user_class() >= UC_SYSOP) { ?><a class='nav-btn' href="settings.php"><?php echo $lang_functions['text_site_settings'] ?></a><?php } ?>
 					<!-- 收藏 -->
-                	<a class='nav-btn' href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0">[<?php echo $lang_functions['text_bookmarks'] ?>]</a>
+                	<a class='nav-btn' href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0"><?php echo $lang_functions['text_bookmarks'] ?></a>
 					<!-- 魔力相关 -->
-                	<a class='nav-btn' href="mybonus.php">[<?php echo ($lang_functions['text_bonus'].$lang_functions['text_use'].":".number_format($CURUSER['seedbonus'], 1)) ?>]</a>
+                	<a class='nav-btn' href="mybonus.php"><?php echo ($lang_functions['text_bonus'].$lang_functions['text_use'].":".number_format($CURUSER['seedbonus'], 1)) ?></a>
 					<!-- 签到信息 -->
                 	<?php if($attendance){ printf(' <a class="nav-btn" href="attendance.php" class="">'.$lang_functions['text_attended'].'</a>', $attendance->points, $CURUSER['attendance_card']); }else{ printf('<a href="attendance.php" class="nav-btn">%s</a>', $lang_functions['text_attendance']);}?>
 					<!-- 勋章 -->
-                	<a class='nav-btn' href="medal.php">[<?php echo nexus_trans('medal.label')?>]</a>
+                	<a class='nav-btn' href="medal.php"><?php echo nexus_trans('medal.label')?></a>
 					<!-- 邀请 -->
-                	<a class='nav-btn' href="invite.php?id=<?php echo $CURUSER['id']?>">[<?php echo $lang_functions['text_invite'].$lang_functions['text_send'].':'.sprintf('%s(%s)', $CURUSER['invites'], \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('invitee', '')->where('expired_at', '>', now())->count()) ?>]</a>
+                	<a class='nav-btn' href="invite.php?id=<?php echo $CURUSER['id']?>"><?php echo $lang_functions['text_invite'].$lang_functions['text_send'].':'.sprintf('%s(%s)', $CURUSER['invites'], \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('invitee', '')->where('expired_at', '>', now())->count()) ?></a>
 					<!-- 管理系统 -->
-                	<?php if(get_user_class() >= \App\Models\User::CLASS_ADMINISTRATOR) printf('<a class="nav-btn" href="%s" target="_blank">[%s]</a>', nexus_env('FILAMENT_PATH', 'nexusphp'), $lang_functions['text_management_system'])?>
+                	<?php if(get_user_class() >= \App\Models\User::CLASS_ADMINISTRATOR) printf('<a class="nav-btn" href="%s" target="_blank">%s</a>', nexus_env('FILAMENT_PATH', 'nexusphp'), $lang_functions['text_management_system'])?>
 				</div>
 			</div>
         </td>
