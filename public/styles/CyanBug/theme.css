@@ -682,5 +682,6 @@ A.Peasant_Name:visited{color: #708090}
 }
 .nav-btn:hover
 {
-	color: cyan
+	text-decoration: underline;
+	background-color: darkslateblue;
 }

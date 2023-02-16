@@ -689,3 +689,31 @@ A.Peasant_Name:visited{color: #708090}
 .recommended{color:#820084}
 .new{color:#ff0000}
 .striking{color:#ff0000}
+
+.nav-btn {
+    background: #587993;
+    border: .5px solid var(--theme-primary-sys-primary);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-right: 4px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    color: white;
+}
+
+.nav-btn:link{
+	color:#fff;
+	text-decoration: none;
+}
+
+.nav-btn:visited{
+	color:#fff;
+	text-decoration: none;
+}
+.nav-btn:hover
+{
+	text-decoration: underline;
+	background-color: #72b5ec;
+}
