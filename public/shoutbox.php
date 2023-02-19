@@ -94,7 +94,7 @@ else
 
 	if(mb_substr($text,0,3)==='青虫娘'){
 		// 获取当前用户的username和passkey
-		$userInfo = \App\Models\User::query()->findOrFail($userid, ['username', 'passkey']);
+		$userInfo = \App\Models\User::query()->findOrFail($userid, ['username', 'passkey','class','vip_until']);
 		// 截取用户输入的指令
 		$instruction = trim(mb_substr($text,4));
 		// 默认回答
@@ -113,10 +113,11 @@ else
 			if(boolval($chat_row['reward'])){
 				$chat_id = $chat_row['id'];
 				$reward_type = $chat_row['reward_type'];
+				# 奖励间隔：天
 				$reward_interval = intval($chat_row['reward_interval']);
 				// 上次奖励时间，根据这个查询是否在间隔期内
-				$reward_time = time();
-				$last_reward_time = $reward_time-($reward_interval * 60 * 60);
+				$reward_time = strtotime(date("Y-m-d"));
+				$last_reward_time = $reward_time-($reward_interval*24*60*60);
 				// 查询奖励
 				$reward_res = sql_query("SELECT * FROM cyanbug_reward WHERE userid = ".$userid." and chatid = ".sqlesc($chat_id)." AND reward_date > ".$last_reward_time) or sqlerr(__FILE__, __LINE__);
 				$reward_row = mysql_fetch_assoc($reward_res);
@@ -125,32 +126,66 @@ else
 					$message = $chat_row['reward_warning'];
 				}else{
 					$reward_amount = $chat_row['reward_amount'];
+					$get_reward = 0;
 					switch($reward_type){
 						case '1':
-							sql_query("UPDATE users SET class=10, vip_added = 'yes',vip_until=NULL WHERE class<=10 and id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							// VIP
+							if($userInfo->class > 10){
+								$message = '不要闹, 你的等级已经超过了VIP';
+								break;
+							}
+							if($userInfo->class == 10){
+								if($userInfo->vip_until == NULL){
+									$message = '不要闹, 你的等级已经是永久VIP';
+									break;
+								}
+								if($userInfo->vip_until != NULL){
+									$message = '不要闹, 你的VIP还没有到期';
+									break;
+								}
+							}
+							$vip_unit = date('Y-m-d',strtotime("+$reward_amount day"));
+							sql_query("UPDATE users SET class=10, vip_added = 'yes',vip_until='$vip_unit' WHERE class<=10 and id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							$get_reward = 1;
 							break;
 						case '2':
-							$formatDate = sqlesc(date("Y-m-d H:i:s"));
-							$res = sql_query("SELECT id FROM user_metas WHERE meta_key ='PERSONALIZED_USERNAME' AND uid=".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
-							$umid = mysql_fetch_row($res)[0];
-							if($umid===NULL){
-								sql_query("INSERT INTO user_metas (uid,meta_key,status,created_at,updated_at) VALUES (".sqlesc($userid).",'PERSONALIZED_USERNAME',0,".$formatDate.",".$formatDate.")") or sqlerr(__FILE__, __LINE__);
+							// 彩虹ID
+							$userRep = new \App\Repositories\UserRepository();
+							$metas = $userRep->listMetas($userid, \App\Models\UserMeta::META_KEY_PERSONALIZED_USERNAME);
+							if ($metas->isNotEmpty()) {
+								// 当前是彩虹ID
+								$metas = $metas['PERSONALIZED_USERNAME'][0];
+								if($metas['deadline']==NULL){
+									$message = '不要闹, 你已经是永久彩虹ID';
+								}else{
+									$message = '不要闹, 你的彩虹ID还没有到期';
+								}
 							} else {
-								sql_query("UPDATE user_metas SET status=0,deadline=NULL,meta_value=NULL, updated_at=".$formatDate." WHERE id=".$umid) or sqlerr(__FILE__, __LINE__);
+								// 当前不是彩虹ID
+								$format_date = sqlesc(date("Y-m-d H:i:s"));
+								$deadline = date('Y-m-d',strtotime("+$reward_amount day"));
+								sql_query("DELETE FROM user_metas WHERE uid=".sqlesc($userid)." AND meta_key='PERSONALIZED_USERNAME'") or sqlerr(__FILE__, __LINE__);
+								sql_query("INSERT INTO user_metas (`uid`,meta_key,`status`,deadline,created_at,updated_at) VALUES (".sqlesc($userid).",'PERSONALIZED_USERNAME',0,'$deadline',".$format_date.",".$format_date.")") or sqlerr(__FILE__, __LINE__);
+								$get_reward = 1;
 							}
 							break;
 						case '3':
 							sql_query("UPDATE users SET seedbonus=seedbonus+".$reward_amount." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							$get_reward = 1;
 							break;
 						case '4':
 							sql_query("UPDATE users SET uploaded=uploaded+".$reward_amount." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							$get_reward = 1;
 							break;
 						case '5':
 							sql_query("UPDATE users SET downloaded=downloaded+".$reward_amount." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							$get_reward = 1;
 							break;
 					}
-					// 保存奖励记录
-					sql_query("INSERT INTO cyanbug_reward (userid, chatid, reward_date, reward_amount) VALUES (" . sqlesc($userid) . ", " . sqlesc($chat_id) . ", " . sqlesc($reward_time) . ", ".sqlesc($reward_amount).")") or sqlerr(__FILE__, __LINE__);
+					if($get_reward==1){
+						// 保存奖励记录
+						sql_query("INSERT INTO cyanbug_reward (userid, chatid, reward_date, reward_amount) VALUES (" . sqlesc($userid) . ", " . sqlesc($chat_id) . ", " . sqlesc($reward_time) . ", ".sqlesc($reward_amount).")") or sqlerr(__FILE__, __LINE__);
+					}
 					// 清空用户的缓存
 					clear_user_cache($userid, $userInfo->passkey);
 				}

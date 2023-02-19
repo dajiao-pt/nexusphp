@@ -2695,10 +2695,10 @@ else {
                 	<?php if (get_user_class() >= UC_SYSOP) { ?><a class='nav-btn' href="settings.php"><?php echo $lang_functions['text_site_settings'] ?></a><?php } ?>
 					<!-- 收藏 -->
                 	<a class='nav-btn' href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0"><?php echo $lang_functions['text_bookmarks'] ?></a>
-					<!-- 魔力相关 -->
-                	<a class='nav-btn' href="mybonus.php"><?php echo ($lang_functions['text_bonus'].$lang_functions['text_use'].":".number_format($CURUSER['seedbonus'], 1)) ?></a>
 					<!-- 签到信息 -->
                 	<?php if($attendance){ printf(' <a class="nav-btn" href="attendance.php" class="">'.$lang_functions['text_attended'].'</a>', $attendance->points, $CURUSER['attendance_card']); }else{ printf('<a href="attendance.php" class="nav-btn">%s</a>', $lang_functions['text_attendance']);}?>
+					<!-- 魔力相关 -->
+                	<a class='nav-btn' href="mybonus.php"><?php echo ($lang_functions['text_bonus'].$lang_functions['text_use'].":".number_format($CURUSER['seedbonus'], 1)) ?></a>
 					<!-- 勋章 -->
                 	<a class='nav-btn' href="medal.php"><?php echo nexus_trans('medal.label')?></a>
 					<!-- 邀请 -->

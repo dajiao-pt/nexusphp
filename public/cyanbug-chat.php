@@ -8,7 +8,7 @@ if (file_exists($langFile)) {
     require $langFile;
 }
 
-stdhead($lang_staffpanel["Administration"] ?? 'Administration');
+stdhead('青虫娘设置');
 if (get_user_class() < UC_MODERATOR) {
     stdmsg("Error", "Access denied!!!");
     stdfoot();
@@ -54,9 +54,10 @@ if (isset($_GET['action'])) {
                 }
             }
             echo "</select></td></tr>
-            <tr><td class=rowhead>奖励间隔（小时）</td><td><input type=number name=reward_interval size=40 value=" . $row['reward_interval'] . "></td></tr>
+            <tr><td class=rowhead>奖励间隔</td><td><input type=number name=reward_interval size=40 value=" . $row['reward_interval'] . "></td></tr>
             <tr><td class=rowhead>奖励数量</td><td><input type=number name=reward_amount size=40 value=" . $row['reward_amount'] . "></td></tr>
             <tr><td class=rowhead>重复警告</td><td><textarea type=textarea style='resize: none' name=reward_warning rows=4 cols=80>".$row['reward_warning']."</textarea></td></tr>
+            <tr><td class=rowhead>参数说明</td><td>奖励间隔单位：天<br>奖励数量[魔力]单位：个<br>奖励数量[上传/下载]单位：比特<br>奖励数量[VIP/彩虹ID]单位：天</td></tr>
             <tr><td colspan=2 align=center><input type=submit value=保存设置 class=btn></td></tr>
             <tr><td colspan=2 align=center><a href='cyanbug-chat.php'>放弃并返回</a></td></tr>
             </table></form>";
@@ -119,7 +120,7 @@ echo "<h1 align=center>..:: 青虫娘设置 ::..</h1><br/>
       <td class=colhead align=left>回复</td>
       <td class=colhead align=left>含奖励</td>
       <td class=colhead align=left>奖励类型</td>
-      <td class=colhead align=left>奖励间隔（小时）</td>
+      <td class=colhead align=left>奖励间隔</td>
       <td class=colhead align=left>奖励数量</td>
       <td class=colhead align=left>重复警告</td>
       <td class=colhead align=left>操作</td>";
