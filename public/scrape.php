@@ -1,22 +1,19 @@
 <?php
 require_once('../include/bittorrent_announce.php');
-$apiLocalHost = nexus_env('TRACKER_API_LOCAL_HOST');
-if ($apiLocalHost) {
-    do_log("[TRACKER_API_LOCAL_HOST] $apiLocalHost");
-    $response = request_local_api(trim($apiLocalHost, '/') . '/api/scrape');
-    if (empty($response)) {
-        err("error from TRACKER_API_LOCAL_HOST");
-    } else {
-        exit(benc_resp_raw($response));
-    }
-}
-
 require ROOT_PATH . 'include/core.php';
 //require_once('../include/benc.php');
 dbconn_announce();
 
 // BLOCK ACCESS WITH WEB BROWSERS AND CHEATS!
 block_browser();
+
+$cacheKey = md5($_SERVER["QUERY_STRING"]);
+$cacheData = \Nexus\Database\NexusDB::cache_get($cacheKey);
+if ($cacheData) {
+    do_log("[SCRAPE_FROM_CACHE]: " . $_SERVER["QUERY_STRING"]);
+    benc_resp($cacheData);
+    exit(0);
+}
 
 preg_match_all('/info_hash=([^&]*)/i', $_SERVER["QUERY_STRING"], $info_hash_array);
 $fields = "info_hash, times_completed, seeders, leechers";
@@ -45,4 +42,5 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 $d = ['files' => $torrent_details];
+\Nexus\Database\NexusDB::cache_put($cacheKey, $d, 1200);
 benc_resp($d);

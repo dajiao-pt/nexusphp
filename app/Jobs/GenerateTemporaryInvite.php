@@ -45,6 +45,10 @@ class GenerateTemporaryInvite implements ShouldQueue
         return now()->addHours(1);
     }
 
+    public $tries = 1;
+
+    public $timeout = 1800;
+
     /**
      * Execute the job.
      *
@@ -76,6 +80,17 @@ class GenerateTemporaryInvite implements ShouldQueue
             }
         }
 
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param  \Throwable  $exception
+     * @return void
+     */
+    public function failed(\Throwable $exception)
+    {
+        do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
     }
 
 }

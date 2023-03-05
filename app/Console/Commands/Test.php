@@ -95,9 +95,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $now = Carbon::now();
-        $now->addSeconds();
-        dd($diffInSeconds);
+
     }
 
 }
