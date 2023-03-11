@@ -90,6 +90,7 @@ $lang_functions = array
 	'title_torrents_seeding' => "當前做種",
 	'title_torrents_leeching' => "當前下載",
 	'text_connectable' => "可連接：",
+	'text_blackjack' => "21點",
 	'text_the_time_is_now' => "時間: ",
 	'text_message_new' => " 新",
 	'title_sentbox' => "發件箱",

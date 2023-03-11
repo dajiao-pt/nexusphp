@@ -90,6 +90,7 @@ $lang_functions = array
 	'title_torrents_seeding' => "Torrents&nbsp;Seeding",
 	'title_torrents_leeching' => "Torrents&nbsp;Leeching",
 	'text_connectable' => "Connectable:&nbsp;",
+	'text_blackjack' => "Blackjack",
 	'text_the_time_is_now' => "Time: ",
 	'text_message_new' => " New",
 	'title_sentbox' => "sentbox",
