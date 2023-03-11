@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('cards', function (Blueprint $table) {
             $table->id();
             $table->integer('points');
-            $table->blob('pic');
+            $table->binary('pic');
         });
     }
 
