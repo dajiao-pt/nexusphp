@@ -10,7 +10,7 @@ if ($blackjack === 'no' || $CURUSER['class'] < UC_USER) {
 }
 $HTMLOUT = '';
 //$mb = 102400 * 1024 * 1024;
-$mb = 1000;
+$mb = 10000;
 $now = sqlesc(date("Y-m-d H:i:s"));
 $game = isset($_POST["game"]) ? htmlspecialchars(trim($_POST["game"])) : '';
 $start = isset($_POST["start"]) ? htmlspecialchars(trim($_POST["start"])) : '';
@@ -188,8 +188,8 @@ if ($game) {
                 $r = sql_query("SELECT bj.*, u.username FROM blackjack AS bj LEFT JOIN users AS u ON u.id=bj.userid WHERE bj.status='waiting' AND bj.userid != " . sqlesc($CURUSER['id']) . " ORDER BY bj.date ASC LIMIT 1");
                 $a = mysql_fetch_assoc($r);
                 if ($a["points"] !== 21) {
-                    $winorlose = $lang_blackjack['text_win'] . $mb * 0.95;
-                    sql_query("UPDATE users SET seedbonus = seedbonus + $mb * 0.95, bjwins = bjwins + 1 WHERE id=" . sqlesc($CURUSER['id']));
+                    $winorlose = $lang_blackjack['text_win'] . $mb * 0.90;
+                    sql_query("UPDATE users SET seedbonus = seedbonus + $mb * 0.90, bjwins = bjwins + 1 WHERE id=" . sqlesc($CURUSER['id']));
                     sql_query("UPDATE users SET seedbonus = seedbonus - $mb, bjlosses = bjlosses + 1 WHERE id=" . sqlesc($a['userid']));
                     $msg = sqlesc("[url=blackjack.php]" . $lang_blackjack['text_go_back_to'] . "[/url]");
                     $subject = sqlesc($lang_blackjack['text_losss'] . $a['points'] . $lang_blackjack['text_dian'] . $CURUSER['username'] . $lang_blackjack['text_you21dian']);
@@ -225,7 +225,7 @@ if ($game) {
                     $subject = sqlesc($lang_blackjack['text_losss_tie'] . $CURUSER['username'] . $lang_blackjack['text_dou_21_points']);
                 } else {
                     $winorlose = $lang_blackjack['text_losing_the_game_you_lose'] . $mb;
-                    sql_query("UPDATE users SET seedbonus = seedbonus + $mb * 0.95, bjwins = bjwins + 1 WHERE id=" . sqlesc($a['userid']));
+                    sql_query("UPDATE users SET seedbonus = seedbonus + $mb * 0.90, bjwins = bjwins + 1 WHERE id=" . sqlesc($a['userid']));
                     sql_query("UPDATE users SET seedbonus = seedbonus - $mb, bjlosses = bjlosses + 1 WHERE id=" . sqlesc($CURUSER['id']));
                     $msg = sqlesc("[url=blackjack.php]" . $lang_blackjack['text_go_back_to'] . "[/url]");
                     $subject = sqlesc($lang_blackjack['text_wins'] . $a['points'] . $lang_blackjack['text_dian'] . $CURUSER['username'] . $lang_blackjack['text_wins_msg']);
@@ -295,7 +295,7 @@ if ($game) {
                 if (($a["points"] < $playerarr['points'] && $a['points'] < 21) || ($a["points"] > $playerarr['points'] && $a['points'] > 21)) {
                     $msg = sqlesc("[url=blackjack.php]" . $lang_blackjack['text_go_back_to'] . "[/url]");
                     $subject = sqlesc($lang_blackjack['text_losss'] . $a['points'] . $lang_blackjack['text_dian'] . $CURUSER['username'] . $lang_blackjack['text_there_are'] . $playerarr['points'] . $lang_blackjack['text_dians']);
-                    $winorlose = $lang_blackjack['text_win_you_get'] . $mb * 0.95;
+                    $winorlose = $lang_blackjack['text_win_you_get'] . $mb * 0.90;
                     $st_query = "+ " . $mb . ", bjwins = bjwins +";
                     $nd_query = "- " . $mb . ", bjlosses = bjlosses +";
                 } elseif (($a["points"] > $playerarr['points'] && $a['points'] < 21) || $a["points"] == 21 || ($a["points"] < $playerarr['points'] && $a['points'] > 21)) {
@@ -344,7 +344,7 @@ if ($game) {
         $win_perc = ($tot_losses === 0 ? "100%" : ($tot_wins === 0 ? "0" : number_format(($tot_wins / $tot_games) * 100, 1)) . '%');
     }
     /** @noinspection NestedTernaryOperatorInspection */
-    $plus_minus = ($tot_wins - $tot_losses < 0 ? '-' : '') . (($tot_wins - $tot_losses >= 0 ? ($tot_wins - $tot_losses) * 0.95 : ($tot_losses - $tot_wins))) * $mb;
+    $plus_minus = ($tot_wins - $tot_losses < 0 ? '-' : '') . (($tot_wins - $tot_losses >= 0 ? ($tot_wins - $tot_losses) * 0.90 : ($tot_losses - $tot_wins))) * $mb;
     $HTMLOUT .= "<div class='layui-panel center' style='width: 400px;padding: 30px;margin: 0 auto;'>";
     $HTMLOUT .= "<img src='pic/cards/tp.bmp' alt='card'/>&nbsp;<img src='pic/cards/vp.bmp' alt='card'/>";
     $HTMLOUT .= "<p style='margin-top: 20px;'>".$lang_blackjack['text_rules_msg'] . $waitarr['c'] . "</p>";
