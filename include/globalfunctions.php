@@ -1178,7 +1178,9 @@ function executeCommand($command, $format = 'string', $artisan = false, $excepti
 
 function has_role_work_seeding($uid)
 {
-    return apply_filter('user_has_role_work_seeding', false, $uid);
+    $result = apply_filter('user_has_role_work_seeding', false, $uid);
+    do_log("uid: $uid, result: $result");
+    return $result;
 }
 
 function format_chat_answer($userid, $message){

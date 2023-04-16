@@ -13,14 +13,14 @@ class UserLoginNotify extends Command
      *
      * @var string
      */
-    protected $signature = 'user:login_notify {--this_id=} {--last_id=}';
+    protected $signature = 'user:login_notify {--this_id=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Send login notify, option: --this_id, --last_id';
+    protected $description = 'Send login notify, option: --this_id';
 
     /**
      * Execute the console command.
@@ -30,9 +30,12 @@ class UserLoginNotify extends Command
     public function handle()
     {
         $thisId = $this->option('this_id');
-        $lastId = $this->option('last_id');
-        $this->info("thisId: $thisId, lastId: $lastId");
-        SendLoginNotify::dispatch($thisId, $lastId);
+        $this->info("thisId: $thisId");
+        if (!$thisId) {
+            $this->error("require option --this_id=?");
+            return Command::FAILURE;
+        }
+        SendLoginNotify::dispatch($thisId);
         return Command::SUCCESS;
     }
 }

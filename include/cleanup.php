@@ -350,6 +350,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	if ($printProgress) {
 		printProgress($log);
 	}
+
 //Priority Class 3: cleanup every 60 mins
 	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime3'");
 	$row = mysql_fetch_array($res);
@@ -547,6 +548,18 @@ function docleanup($forceAll = 0, $printProgress = false) {
 		printProgress($log);
 	}
 
+    //sync to Meilisearch
+    $meiliRep = new \App\Repositories\MeiliSearchRepository();
+    if ($meiliRep->isEnabled()) {
+        $meiliRep->import();
+    }
+    $log = "sync to Meilisearch";
+    do_log($log);
+    if ($printProgress) {
+        printProgress($log);
+    }
+
+
 //Priority Class 4: cleanup every 24 hours
 	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime4'");
 	$row = mysql_fetch_array($res);
@@ -716,7 +729,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
     }
 
 	//remove VIP status if time's up
-	$res = sql_query("SELECT id, modcomment FROM users WHERE vip_added='yes' AND vip_until < NOW()") or sqlerr(__FILE__, __LINE__);
+	$res = sql_query("SELECT id, modcomment, class FROM users WHERE vip_added='yes' AND vip_until < NOW()") or sqlerr(__FILE__, __LINE__);
 	if (mysql_num_rows($res) > 0)
 	{
 		while ($arr = mysql_fetch_assoc($res))
@@ -729,8 +742,16 @@ function docleanup($forceAll = 0, $printProgress = false) {
 			$modcomment =  date("Y-m-d") . " - VIP status removed by - AutoSystem.\n". $modcomment;
 			$modcom =  sqlesc($modcomment);
 			///---end
-			sql_query("UPDATE users SET class = '1', vip_added = 'no', vip_until = null, modcomment = $modcom WHERE id = {$arr['id']}") or sqlerr(__FILE__, __LINE__);
-			sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES(0, {$arr['id']}, $dt, $msg, $subject)") or sqlerr(__FILE__, __LINE__);
+			if ($arr['class'] > \App\Models\User::CLASS_VIP) {
+                /**
+                 * @since 1.8
+                 * never demotion VIP above
+                 */
+                sql_query("UPDATE users SET vip_added = 'no', vip_until = null, modcomment = $modcom WHERE id = {$arr['id']}") or sqlerr(__FILE__, __LINE__);
+            } else {
+                sql_query("UPDATE users SET class = '1', vip_added = 'no', vip_until = null, modcomment = $modcom WHERE id = {$arr['id']}") or sqlerr(__FILE__, __LINE__);
+                sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES(0, {$arr['id']}, $dt, $msg, $subject)") or sqlerr(__FILE__, __LINE__);
+            }
 		}
 	}
 	$log = "remove VIP status if time's up";
