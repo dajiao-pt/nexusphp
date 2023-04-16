@@ -145,7 +145,7 @@ else
 								}
 							}
 							$vip_unit = date('Y-m-d',strtotime("+$reward_amount day"));
-							sql_query("UPDATE users SET class=10, vip_added = 'yes',vip_until='$vip_unit' WHERE class<=10 and id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
+							sql_query("UPDATE users SET class=10, vip_added = 'yes',vip_until='$vip_unit', leechwarn = 'no', leechwarnuntil = null WHERE class<=10 and id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
 							$get_reward = 1;
 							break;
 						case '2':
