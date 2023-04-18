@@ -92,7 +92,7 @@ else
 
 	sql_query("INSERT INTO shoutbox (userid, date, text, type) VALUES (" . sqlesc($userid) . ", $date, " . sqlesc($text) . ", ".sqlesc($type).")") or sqlerr(__FILE__, __LINE__);
 
-	if(mb_substr($text,0,3)==='青虫娘'){
+	if(mb_substr($text,0,3)==='打胶妹'){
 		// 获取当前用户的username和passkey
 		$userInfo = \App\Models\User::query()->findOrFail($userid, ['username', 'passkey','class','vip_until']);
 		// 截取用户输入的指令

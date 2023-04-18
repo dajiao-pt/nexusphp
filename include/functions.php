@@ -2690,7 +2690,7 @@ else {
 					<a class='nav-btn' href="usercp.php"><?php echo $lang_functions['text_user_cp'] ?></a>
 					<!-- 管理组面板 -->
                 	<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="staffpanel.php"><?php echo $lang_functions['text_staff_panel'] ?></a><?php }?>
-					<!-- 青虫娘设置 -->
+					<!-- 打胶妹设置 -->
 					<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="cyanbug-chat.php"><?php echo $lang_functions['text_cyanbug_chat_settings'] ?></a><?php }?>
 					<!-- 站点设置 -->
                 	<?php if (get_user_class() >= UC_SYSOP) { ?><a class='nav-btn' href="settings.php"><?php echo $lang_functions['text_site_settings'] ?></a><?php } ?>
@@ -3280,7 +3280,7 @@ function commenttable($rows, $type, $parent_id, $review = false)
 		($row["editedby"] && user_can('commanage') ? " - [<a href=\"comment.php?action=vieworiginal&amp;cid=".$row['id']."&amp;type=".$type."\">".$lang_functions['text_view_original']."</a>]" : "") . "</td><td class=\"embedded nowrap\" width=\"1%\"><a href=\"#top\"><img class=\"top\" src=\"pic/trans.gif\" alt=\"Top\" title=\"Top\" /></a>&nbsp;&nbsp;</td></tr></table></div>");
 		$avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars(trim($userRow["avatar"])) : "");
 		if (!$avatar)
-			$avatar = "pic/default_avatar.gif";
+			$avatar = "pic/default_avatar.png";
 		$text = format_comment($row["text"]);
 		$text_editby = "";
 		if ($row["editedby"]){

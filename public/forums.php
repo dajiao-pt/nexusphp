@@ -734,7 +734,7 @@ if ($action == "viewtopic")
 		$by = get_username($posterid,false,true,true,false,false,true);
 
 		if (!$avatar)
-			$avatar = "pic/default_avatar.gif";
+			$avatar = "pic/default_avatar.png";
 
 		if ($pn == $pc)
 		{

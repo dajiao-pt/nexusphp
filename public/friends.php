@@ -136,7 +136,7 @@ while ($friend = mysql_fetch_array($res))
 
 	$avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars($friend["avatar"]) : "");
 	if (!$avatar)
-	$avatar = "pic/default_avatar.gif";
+	$avatar = "pic/default_avatar.png";
 	if ($i % 2 == 0)
 	print("<table width=100% style='padding: 0px'><tr><td class=bottom style='padding: 5px' width=50% align=center>");
 	else
@@ -232,7 +232,7 @@ else
 					"<br /><br /><a href=sendmessage.php?receiver=" . $neighbors_arr['id'] . ">".$lang_friends['text_send_pm']."</a>";
 					$avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars($neighbors_arr["avatar"]) : "");
 					if (!$avatar)
-					$avatar = "pic/default_avatar.gif";
+					$avatar = "pic/default_avatar.png";
 					if ($i % 2 == 0)
 					print("<table width=100% style='padding: 0px'><tr><td class=bottom style='padding: 5px' width=50% align=center>");
 					else
@@ -293,7 +293,7 @@ $body2 = "<a href=friends.php?id=$userid&action=add&type=friend&targetid=" . $fr
 "<br /><br /><a href=sendmessage.php?receiver=" . $friend['fuid'] . ">".$lang_friends['text_send_pm']."</a>";
 $avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars($friend["avatar"]) : "");
 if (!$avatar)
-$avatar = "pic/default_avatar.gif";
+$avatar = "pic/default_avatar.png";
 if ($i % 2 == 0)
 print("<table width=100% style='padding: 0px'><tr><td class=bottom style='padding: 5px' width=50% align=center>");
 else

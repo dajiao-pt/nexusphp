@@ -8,7 +8,7 @@ if (file_exists($langFile)) {
     require $langFile;
 }
 
-stdhead('青虫娘设置');
+stdhead('打胶妹设置');
 if (get_user_class() < UC_MODERATOR) {
     stdmsg("Error", "Access denied!!!");
     stdfoot();
@@ -110,7 +110,7 @@ if (isset($_GET['action'])) {
 }
 
 begin_main_frame();
-echo "<h1 align=center>..:: 青虫娘设置 ::..</h1><br/>
+echo "<h1 align=center>..:: 打胶妹设置 ::..</h1><br/>
       <span id=add><a href='?action=add' class=big><b>添加</b></a></span>
       <table width='100%' border=1 cellspacing=0 cellpadding=5 align=center>
       <td class=colhead align=left>ID</td>

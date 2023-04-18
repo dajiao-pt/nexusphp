@@ -1236,7 +1236,7 @@ function get_user_avatar(){
     $userRow = get_user_row($userid);
     $avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars(trim($CURUSER["avatar"])) : "");
     if (!$avatar){
-        $avatar = "pic/default_avatar.gif";
+        $avatar = "pic/default_avatar.png";
     }
     return $avatar;
 }
