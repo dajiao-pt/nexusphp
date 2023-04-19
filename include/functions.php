@@ -2334,6 +2334,7 @@ function menu ($selected = "home") {
 		."<ul class='sub_menu'>
 		<li><a href=\"torrents.php?cat=401\" >".$lang_functions['text_torrents_movies']."</a></li>
 		<li><a href=\"torrents.php?cat=402\" >".$lang_functions['text_torrents_tvseries']."</a></li>
+		<li><a href=\"torrents.php?cat=402\" >".$lang_functions['text_torrents_tvshows']."</a></li>
 		</ul></li>");
 		if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");

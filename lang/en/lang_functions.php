@@ -52,6 +52,7 @@ $lang_functions = array
 	'text_torrents' => "Torrents",
 	'text_torrents_movies' => "Movies",
 	'text_torrents_tvseries' => "TV Series",
+	'text_torrents_tvshows' => "TV Shows",
 	'text_offers' => "Offers",
 	'text_request' => "Requests",
 	'text_upload' => "Upload",
