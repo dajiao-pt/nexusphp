@@ -52,6 +52,7 @@ $lang_functions = array
 	'text_torrents' => "&nbsp;种&nbsp;&nbsp;子&nbsp;",
 	'text_torrents_movies' => "&nbsp;电&nbsp;影&nbsp;",
 	'text_torrents_tvseries' => "电视剧",
+	'text_torrents_tvshows' => "综艺",
 	'text_offers' => "&nbsp;候&nbsp;&nbsp;选&nbsp;",
 	'text_request' => "&nbsp;求&nbsp;&nbsp;种&nbsp;",
 	'text_upload' => "&nbsp;发&nbsp;&nbsp;布&nbsp;",
