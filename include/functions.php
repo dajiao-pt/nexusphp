@@ -2334,7 +2334,13 @@ function menu ($selected = "home") {
 		."<ul class='sub_menu'>
 		<li><a href=\"torrents.php?cat=401\" >".$lang_functions['text_torrents_movies']."</a></li>
 		<li><a href=\"torrents.php?cat=402\" >".$lang_functions['text_torrents_tvseries']."</a></li>
-		<li><a href=\"torrents.php?cat=402\" >".$lang_functions['text_torrents_tvshows']."</a></li>
+		<li><a href=\"torrents.php?cat=405\" >".$lang_functions['text_torrents_anime']."</a></li>
+		<li><a href=\"torrents.php?cat=403\" >".$lang_functions['text_torrents_tvshows']."</a></li>
+		<li><a href=\"torrents.php?cat=404\" >".$lang_functions['text_torrents_doc']."</a></li>
+		<li><a href=\"torrents.php?cat=413\" >".$lang_functions['text_torrents_book']."</a></li>
+		<li><a href=\"torrents.php?cat=411\" >".$lang_functions['text_torrents_comic']."</a></li>
+		<li><a href=\"torrents.php?cat=409\" >".$lang_functions['text_torrents_music']."</a></li>
+		<li><a href=\"torrents.php?cat=412\" >".$lang_functions['text_torrents_audiobook']."</a></li>
 		</ul></li>");
 		if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
