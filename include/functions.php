@@ -2735,7 +2735,7 @@ else {
                 <?php }?>
 	<td class="bottom" align="right"><span class="medium">
 <?php
-print ("<a class='nav-btn' href='blackjack.php'>". $lang_functions['text_blackjack']."</a>");
+// print ("<a class='nav-btn' href='blackjack.php'>". $lang_functions['text_blackjack']."</a>");
 if (user_can('staffmem')) {
     $totalreports = $Cache->get_value('staff_report_count');
     if ($totalreports == ""){
