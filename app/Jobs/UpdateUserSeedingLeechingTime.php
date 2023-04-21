@@ -55,6 +55,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
      */
     public function handle()
     {
+        do_log("[CLEANUP_CLI_UPDATE_SEEDING_LEECHING_TIME_HANDLE_JOB] Start.");
         $beginTimestamp = time();
         $logPrefix = sprintf("[CLEANUP_CLI_UPDATE_SEEDING_LEECHING_TIME_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s", $this->requestId, $this->beginUid, $this->endUid);
 //        $sql = sprintf(
@@ -91,6 +92,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
         }
         $costTime = time() - $beginTimestamp;
         do_log("$logPrefix, [DONE], user total count: " . count($users) . ", success update count: $count, cost time: $costTime seconds");
+        do_log("[CLEANUP_CLI_UPDATE_SEEDING_LEECHING_TIME_HANDLE_JOB] Done.");
     }
 
     /**

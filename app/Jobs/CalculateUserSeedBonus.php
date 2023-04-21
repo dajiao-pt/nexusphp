@@ -55,6 +55,7 @@ class CalculateUserSeedBonus implements ShouldQueue
      */
     public function handle()
     {
+        do_log("[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB] Start.");
         $beginTimestamp = time();
         $logPrefix = sprintf("[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s", $this->requestId, $this->beginUid, $this->endUid);
         $sql = sprintf("select userid from peers where userid > %s and userid <= %s and seeder = 'yes' group by userid", $this->beginUid, $this->endUid);
@@ -123,6 +124,7 @@ class CalculateUserSeedBonus implements ShouldQueue
         }
         $costTime = time() - $beginTimestamp;
         do_log("$logPrefix, [DONE], cost time: $costTime seconds");
+        do_log("[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB] Done.");
     }
 
     /**

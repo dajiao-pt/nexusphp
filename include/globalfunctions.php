@@ -261,7 +261,7 @@ function getLogFile($append = '')
     if ($append) {
         $name .= "-$append";
     }
-    $logFile = sprintf('%s-%s%s', $name, date('Y-m-d'), $suffix);
+    $logFile = sprintf('%s-%s%s', $name, date('Y-m-d-H'), $suffix);
     return $logFiles[$append] = $logFile;
 
 }
