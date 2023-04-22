@@ -55,15 +55,14 @@ class CalculateUserSeedBonus implements ShouldQueue
      */
     public function handle()
     {
-        do_log2("[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB] Start.");
         $beginTimestamp = time();
         $logPrefix = sprintf("[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s", $this->requestId, $this->beginUid, $this->endUid);
         $sql = sprintf("select userid from peers where userid > %s and userid <= %s and seeder = 'yes' group by userid", $this->beginUid, $this->endUid);
         $results = NexusDB::select($sql);
         $count = count($results);
-        do_log2("$logPrefix, [GET_UID], sql: $sql, count: " . count($results));
+        do_log("$logPrefix, [GET_UID], sql: $sql, count: " . count($results));
         if ($count == 0) {
-            do_log2("$logPrefix, no user...");
+            do_log("$logPrefix, no user...");
             return;
         }
         $haremAdditionFactor = Setting::get('bonus.harem_addition');
@@ -73,7 +72,7 @@ class CalculateUserSeedBonus implements ShouldQueue
         $sql = sprintf("select %s from users where id in (%s)", implode(',', User::$commonFields), implode(',', array_column($results, 'userid')));
         $results = NexusDB::select($sql);
         $logFile = getLogFile("seed-bonus-points");
-        do_log2("$logPrefix, [GET_UID_REAL], count: " . count($results) . ", logFile: $logFile");
+        do_log("$logPrefix, [GET_UID_REAL], count: " . count($results) . ", logFile: $logFile");
         $fd = fopen($logFile, 'a');
         foreach ($results as $userInfo)
         {
@@ -108,7 +107,7 @@ class CalculateUserSeedBonus implements ShouldQueue
             $seed_points = $seedBonusResult['seed_points'] / $dividend;
             $updatedAt = now()->toDateTimeString();
             $sql = "update users set seed_points = ifnull(seed_points, 0) + $seed_points, seedbonus = seedbonus + $all_bonus, seed_points_updated_at = '$updatedAt' where id = $uid limit 1";
-            do_log2("$bonusLog, query: $sql");
+            do_log("$bonusLog, query: $sql");
             NexusDB::statement($sql);
             if ($fd) {
                 $log = sprintf(
@@ -119,12 +118,11 @@ class CalculateUserSeedBonus implements ShouldQueue
                 );
                 fwrite($fd, $log . PHP_EOL);
             } else {
-                do_log2("logFile: $logFile is not writeable!", 'error');
+                do_log("logFile: $logFile is not writeable!", 'error');
             }
         }
         $costTime = time() - $beginTimestamp;
-        do_log2("$logPrefix, [DONE], cost time: $costTime seconds");
-        do_log2("[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB] Done.");
+        do_log("$logPrefix, [DONE], cost time: $costTime seconds");
     }
 
     /**
@@ -135,6 +133,6 @@ class CalculateUserSeedBonus implements ShouldQueue
      */
     public function failed(\Throwable $exception)
     {
-        do_log2("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
+        do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
     }
 }

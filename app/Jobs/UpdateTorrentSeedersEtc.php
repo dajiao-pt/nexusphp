@@ -55,7 +55,6 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
      */
     public function handle()
     {
-        do_log("[CLEANUP_CLI_UPDATE_TORRENT_SEEDERS_ETC_HANDLE_JOB] Start.");
         $beginTimestamp = time();
         $logPrefix = sprintf("[CLEANUP_CLI_UPDATE_TORRENT_SEEDERS_ETC_HANDLE_JOB], commonRequestId: %s, beginTorrentId: %s, endTorrentId: %s", $this->requestId, $this->beginTorrentId, $this->endTorrentId);
 //        $sql = sprintf("update torrents set seeders = (select count(*) from peers where torrent = torrents.id and seeder = 'yes'), leechers = (select count(*) from peers where torrent = torrents.id and seeder = 'no'), comments = (select count(*) from comments where torrent = torrents.id) where id > %s and id <= %s",
@@ -100,7 +99,6 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
             "$logPrefix, [DONE], update torrent count: %s, cost time: %s seconds",
             count($torrents), $costTime
         ));
-        do_log("[CLEANUP_CLI_UPDATE_TORRENT_SEEDERS_ETC_HANDLE_JOB] Done.");
     }
 
     /**

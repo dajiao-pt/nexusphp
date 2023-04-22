@@ -305,7 +305,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	$maxUid = $maxUidRes['max_uid'];
 	$phpPath = nexus_env('PHP_PATH') ?: 'php';
 	$webRoot = rtrim(ROOT_PATH, '/');
-	$chunk = 10000;
+	$chunk = 1000;
 	$beginUid = 0;
     do_log("maxUid: $maxUid, chunk: $chunk");
 	do {

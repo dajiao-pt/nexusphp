@@ -30,12 +30,10 @@ class Cleanup extends Command
      */
     public function handle()
     {
-        do_log("[Command-Cleanup] Start.");
         $action = $this->option('action');
         $beginId = $this->option('begin_id');
         $endId = $this->option('end_id');
         $commentRequestId = $this->option('request_id');
-        do_log("[Command-Cleanup] Param:".$action.$beginId.$endId.$commentRequestId);
         $this->info("beginId: $beginId, endId: $endId, commentRequestId: $commentRequestId, action: $action");
         if ($action == 'seed_bonus') {
             CalculateUserSeedBonus::dispatch($beginId, $endId, $commentRequestId);
@@ -48,7 +46,6 @@ class Cleanup extends Command
             do_log($msg, 'error');
             $this->error($msg);
         }
-        do_log("[Command-Cleanup] Done.");
         return Command::SUCCESS;
     }
 }
