@@ -163,6 +163,112 @@ function nexus_dd($vars)
  * @param $log
  * @param string $level
  */
+function do_log2($log, $level = 'info', $echo = false)
+{
+    static $env, $setLogLevel;
+    if (is_null($setLogLevel)) {
+        $setLogLevel = nexus_env('LOG_LEVEL', 'debug');
+    }
+    if (is_null($env)) {
+        $env = nexus_env('APP_ENV', 'production');
+    }
+    $logLevels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
+    $setLogLevelKey = array_search($setLogLevel, $logLevels);
+    $currentLogLevelKey = array_search($level, $logLevels);
+    if ($currentLogLevelKey === false) {
+        $level = 'error';
+        $log = "[ERROR_LOG_LEVEL] $log";
+        $currentLogLevelKey = array_search($level, $logLevels);
+    }
+    if ($currentLogLevelKey < $setLogLevelKey) {
+        return;
+    }
+
+    $logFile = getLogFile2();
+	if (($fd = fopen($logFile, 'a')) === false) {
+	    $log .= "--------Can not open $logFile";
+        $fd = fopen(sys_get_temp_dir() . '/nexus.log', 'a');
+	}
+	$uid = 0;
+    if (IN_NEXUS) {
+        global $CURUSER;
+        $user = $CURUSER;
+        $uid = $user['id'] ?? 0;
+        $passkey = $user['passkey'] ?? $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
+    } else {
+        try {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $uid = $user->id ?? 0;
+            $passkey = $user->passkey ?? request('passkey', request('authkey', ''));
+        } catch (\Throwable $exception) {
+            $passkey = "!IN_NEXUS:" . $exception->getMessage();
+        }
+    }
+    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+    $content = sprintf(
+        "[%s] [%s] [%s] [%s] [%s] [%s] %s.%s %s:%s %s%s%s %s%s",
+        date('Y-m-d H:i:s'),
+        nexus() ? nexus()->getRequestId() : 'NO_REQUEST_ID',
+        nexus() ? nexus()->getLogSequence() : 0,
+        sprintf('%.3f', microtime(true) - (nexus() ? nexus()->getStartTimestamp() : 0)),
+        $uid,
+        $passkey,
+        $env, $level,
+        $backtrace[0]['file'] ?? '',
+        $backtrace[0]['line'] ?? '',
+        $backtrace[1]['class'] ?? '',
+        $backtrace[1]['type'] ?? '',
+        $backtrace[1]['function'] ?? '',
+        $log,
+        PHP_EOL
+    );
+    fwrite($fd, $content);
+    fclose($fd);
+    if (is_bool($echo) && $echo) {
+        echo $content . PHP_EOL;
+    }
+    if (nexus()) {
+        nexus()->incrementLogSequence();
+    }
+}
+
+function getLogFile2($append = '')
+{
+    static $logFiles2 = [];
+    if (isset($logFiles2[$append])) {
+        return $logFiles2[$append];
+    }
+    $config = nexus_config('nexus');
+    $path = getenv('NEXUS_LOG_DIR', true);
+    $fromEnv = true;
+    if ($path === false) {
+        $fromEnv = false;
+        $path = sys_get_temp_dir();
+    }
+    $logFile = rtrim($path, '/') . '/nexus_cleanup.log';
+    
+    $lastDotPos = strrpos($logFile, '.');
+    if ($lastDotPos !== false) {
+        $prefix = substr($logFile, 0, $lastDotPos);
+        $suffix = substr($logFile, $lastDotPos);
+    } else {
+        $prefix = $logFile;
+        $suffix = '';
+    }
+    $name = $prefix;
+    if ($append) {
+        $name .= "-$append";
+    }
+    $logFile = sprintf('%s-%s%s', $name, date('Y-m-d-H'), $suffix);
+    return $logFiles2[$append] = $logFile;
+}
+
+/**
+ * write log, use in both pure nexus and inside laravel
+ *
+ * @param $log
+ * @param string $level
+ */
 function do_log($log, $level = 'info', $echo = false)
 {
     static $env, $setLogLevel;
