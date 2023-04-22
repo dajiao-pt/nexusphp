@@ -36,11 +36,11 @@ class Cleanup extends Command
         $commentRequestId = $this->option('request_id');
         $this->info("beginId: $beginId, endId: $endId, commentRequestId: $commentRequestId, action: $action");
         if ($action == 'seed_bonus') {
-            CalculateUserSeedBonus::dispatch($beginId, $endId, $commentRequestId);
+            CalculateUserSeedBonus::dispatchSync($beginId, $endId, $commentRequestId);
         } elseif ($action == 'seeding_leeching_time') {
-            UpdateUserSeedingLeechingTime::dispatch($beginId, $endId, $commentRequestId);
+            UpdateUserSeedingLeechingTime::dispatchSync($beginId, $endId, $commentRequestId);
         }elseif ($action == 'seeders_etc') {
-            UpdateTorrentSeedersEtc::dispatch($beginId, $endId, $commentRequestId);
+            UpdateTorrentSeedersEtc::dispatchSync($beginId, $endId, $commentRequestId);
         } else {
             $msg = "[$commentRequestId], Invalid action: $action";
             do_log($msg, 'error');
