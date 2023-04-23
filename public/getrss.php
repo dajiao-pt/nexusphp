@@ -340,7 +340,7 @@ if (get_setting('main.spsct') == 'yes') {
         </td>
     </tr>
 <tr>
-<tr>
+<!-- <tr>
     <td class="rowhead"><?php echo $lang_getrss['row_paid']?>
     </td>
     <td class="rowfollow" align="left">
@@ -348,7 +348,7 @@ if (get_setting('main.spsct') == 'yes') {
         <label><input type="radio" name="paid" value="1"><?php echo $lang_getrss['paid_yes']?></label>
         <label><input type="radio" name="paid" value="2"><?php echo $lang_getrss['paid_all']?></label>
     </td>
-</tr>
+</tr> -->
 <td class="rowhead"><?php echo $lang_getrss['row_item_title_type']?>
 </td>
 <td class="rowfollow" align="left">
