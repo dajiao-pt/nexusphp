@@ -13,6 +13,7 @@ use App\Models\ExamProgress;
 use App\Models\ExamUser;
 use App\Models\HitAndRun;
 use App\Models\Invite;
+use App\Models\LoginLog;
 use App\Models\Medal;
 use App\Models\Peer;
 use App\Models\SearchBox;
@@ -27,6 +28,7 @@ use App\Repositories\AgentAllowRepository;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\HitAndRunRepository;
+use App\Repositories\MeiliSearchRepository;
 use App\Repositories\PluginRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\SearchRepository;
@@ -95,8 +97,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $logFile = format_description('[img=http://www.baidu.com][img]http://www.baidu.com[/img]');
-        dd($logFile);
+        $r = number_format(12356);
+        dd($r);
     }
 
 }

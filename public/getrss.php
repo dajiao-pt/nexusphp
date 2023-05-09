@@ -340,15 +340,18 @@ if (get_setting('main.spsct') == 'yes') {
         </td>
     </tr>
 <tr>
-<!-- <tr>
+    <?php if(get_setting("torrent.paid_torrent_enabled") == "yes"){?>
+<tr>
     <td class="rowhead"><?php echo $lang_getrss['row_paid']?>
     </td>
     <td class="rowfollow" align="left">
         <label><input type="radio" name="paid" value="0" checked><?php echo $lang_getrss['paid_no']?></label>
         <label><input type="radio" name="paid" value="1"><?php echo $lang_getrss['paid_yes']?></label>
         <label><input type="radio" name="paid" value="2"><?php echo $lang_getrss['paid_all']?></label>
+        <div><?php echo $lang_getrss['row_paid_help'] ?></div>
     </td>
-</tr> -->
+</tr>
+    <?php }?>
 <td class="rowhead"><?php echo $lang_getrss['row_item_title_type']?>
 </td>
 <td class="rowfollow" align="left">

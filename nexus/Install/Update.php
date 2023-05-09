@@ -22,6 +22,7 @@ use App\Repositories\ExamRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\ToolRepository;
+use App\Repositories\TorrentRepository;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Model;
@@ -89,6 +90,7 @@ class Update extends Install
 
     public function runExtraQueries()
     {
+        $toolRep = new ToolRepository();
         /**
          * @since 1.7.13
          */
@@ -289,6 +291,19 @@ class Update extends Install
             }
         }
 
+        if (!$this->isSnatchedTableTorrentUserUnique()) {
+            $toolRep->removeDuplicateSnatch();
+            $this->runMigrate('database/migrations/2023_03_29_021950_handle_snatched_user_torrent_unique.php');
+            $this->doLog("removeDuplicateSnatch and migrate 2023_03_29_021950_handle_snatched_user_torrent_unique");
+        }
+
+        if (!NexusDB::hasIndex("peers", "unique_torrent_peer_user")) {
+            $toolRep->removeDuplicatePeer();
+            $this->runMigrate('database/migrations/2023_04_01_005409_add_unique_torrent_peer_user_to_peers_table.php');
+            $this->doLog("removeDuplicatePeer and migrate 2023_04_01_005409_add_unique_torrent_peer_user_to_peers_table");
+        }
+
+
     }
 
     public function runExtraMigrate()
@@ -479,6 +494,18 @@ class Update extends Install
             Tag::query()->firstOrCreate($attributes, $values);
             $priority--;
         }
+    }
+
+    private function isSnatchedTableTorrentUserUnique(): bool
+    {
+        $tableName = 'snatched';
+        $result = NexusDB::select('show index from ' . $tableName);
+        foreach ($result as $item) {
+            if (in_array($item['Column_name'], ['torrentid', 'userid']) && $item['Non_unique'] == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

@@ -300,22 +300,27 @@ function docleanup($forceAll = 0, $printProgress = false) {
 //	}
 
 	//chunk async
+    $asyncTaskCount = 3;
+    $baseDuration = floor($autoclean_interval_one / ($asyncTaskCount + 1));
+    $delayBase = 0;
     $requestId = nexus()->getRequestId();
     $maxUidRes = mysql_fetch_assoc(sql_query("select max(id) as max_uid from users limit 1"));
 	$maxUid = $maxUidRes['max_uid'];
-	$phpPath = nexus_env('PHP_PATH') ?: 'php';
-	$webRoot = rtrim(ROOT_PATH, '/');
-	$chunk = 10000;
+	$chunk = 1000;
 	$beginUid = 0;
-    do_log("maxUid: $maxUid, chunk: $chunk");
+    $chunkCounts = ceil($maxUid / $chunk);
+    $delay = ceil($baseDuration/$chunkCounts);
+    $i = 0;
+    do_log("autoclean_interval_one: $autoclean_interval_one, baseDuration: $baseDuration, maxUid: $maxUid, chunk: $chunk, chunkCounts: $chunkCounts, delayBase: $delayBase, delay: $delay");
 	do {
 	    $command = sprintf(
-	        '%s %s/artisan cleanup --action=seed_bonus --begin_id=%s --end_id=%s --request_id=%s',
-            $phpPath, $webRoot, $beginUid, $beginUid + $chunk, $requestId
+	        'cleanup --action=seed_bonus --begin_id=%s --end_id=%s --request_id=%s --delay=%s',
+            $beginUid, $beginUid + $chunk, $requestId, $delayBase + $i * $delay
         );
-        $result = exec("$command 2>&1", $output, $result_code);
-        do_log(sprintf('command: %s, result_code: %s, result: %s, output: %s', $command, $result_code, $result, json_encode($output)));
+        $output = executeCommand($command, 'string', true);
+        do_log(sprintf('command: %s, output: %s', $command, $output));
 	    $beginUid += $chunk;
+        $i++;
     } while ($beginUid < $maxUid);
 
 	$log = 'calculate seeding bonus';
@@ -350,6 +355,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	if ($printProgress) {
 		printProgress($log);
 	}
+
 //Priority Class 3: cleanup every 60 mins
 	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime3'");
 	$row = mysql_fetch_array($res);
@@ -402,19 +408,24 @@ function docleanup($forceAll = 0, $printProgress = false) {
 //		sql_query("UPDATE torrents SET " . implode(",", $update) . " WHERE id = $id") or sqlerr(__FILE__, __LINE__);
 //	}
 
+    $delayBase = $baseDuration;
     $maxTorrentIdRes = mysql_fetch_assoc(sql_query("select max(id) as max_torrent_id from torrents limit 1"));
     $maxTorrentId = $maxTorrentIdRes['max_torrent_id'];
     $chunk = 1000;
     $beginTorrentId = 0;
-    do_log("maxTorrentId: $maxTorrentId, chunk: $chunk");
+    $chunkCounts = ceil($maxTorrentId / $chunk);
+    $delay = ceil($baseDuration/$chunkCounts);
+    $i = 0;
+    do_log("maxTorrentId: $maxTorrentId, chunk: $chunk, chunkCounts: $chunkCounts, delayBase: $delayBase, delay: $delay");
     do {
         $command = sprintf(
-            '%s %s/artisan cleanup --action=seeders_etc --begin_id=%s --end_id=%s --request_id=%s',
-            $phpPath, $webRoot, $beginTorrentId, $beginTorrentId + $chunk, $requestId
+            'cleanup --action=seeders_etc --begin_id=%s --end_id=%s --request_id=%s --delay=%s',
+            $beginTorrentId, $beginTorrentId + $chunk, $requestId, $delayBase + $i * $delay
         );
-        $result = exec("$command 2>&1", $output, $result_code);
-        do_log(sprintf('command: %s, result_code: %s, result: %s, output: %s', $command, $result_code, $result, json_encode($output)));
+        $output = executeCommand($command, 'string', true);
+        do_log(sprintf('command: %s, output: %s', $command, $output));
         $beginTorrentId += $chunk;
+        $i++;
     } while ($beginTorrentId < $maxTorrentId);
 	$log = "update count of seeders, leechers, comments for torrents";
 	do_log($log);
@@ -546,6 +557,18 @@ function docleanup($forceAll = 0, $printProgress = false) {
 		do_log($log);
 		printProgress($log);
 	}
+
+    //sync to Meilisearch
+    $meiliRep = new \App\Repositories\MeiliSearchRepository();
+    if ($meiliRep->isEnabled()) {
+        $meiliRep->import();
+    }
+    $log = "sync to Meilisearch";
+    do_log($log);
+    if ($printProgress) {
+        printProgress($log);
+    }
+
 
 //Priority Class 4: cleanup every 24 hours
 	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime4'");
@@ -716,7 +739,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
     }
 
 	//remove VIP status if time's up
-	$res = sql_query("SELECT id, modcomment FROM users WHERE vip_added='yes' AND vip_until < NOW()") or sqlerr(__FILE__, __LINE__);
+	$res = sql_query("SELECT id, modcomment, class FROM users WHERE vip_added='yes' AND vip_until < NOW()") or sqlerr(__FILE__, __LINE__);
 	if (mysql_num_rows($res) > 0)
 	{
 		while ($arr = mysql_fetch_assoc($res))
@@ -729,8 +752,16 @@ function docleanup($forceAll = 0, $printProgress = false) {
 			$modcomment =  date("Y-m-d") . " - VIP status removed by - AutoSystem.\n". $modcomment;
 			$modcom =  sqlesc($modcomment);
 			///---end
-			sql_query("UPDATE users SET class = '1', vip_added = 'no', vip_until = null, modcomment = $modcom WHERE id = {$arr['id']}") or sqlerr(__FILE__, __LINE__);
-			sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES(0, {$arr['id']}, $dt, $msg, $subject)") or sqlerr(__FILE__, __LINE__);
+			if ($arr['class'] > \App\Models\User::CLASS_VIP) {
+                /**
+                 * @since 1.8
+                 * never demotion VIP above
+                 */
+                sql_query("UPDATE users SET vip_added = 'no', vip_until = null, modcomment = $modcom WHERE id = {$arr['id']}") or sqlerr(__FILE__, __LINE__);
+            } else {
+                sql_query("UPDATE users SET class = '1', vip_added = 'no', vip_until = null, modcomment = $modcom WHERE id = {$arr['id']}") or sqlerr(__FILE__, __LINE__);
+                sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES(0, {$arr['id']}, $dt, $msg, $subject)") or sqlerr(__FILE__, __LINE__);
+            }
 		}
 	}
 	$log = "remove VIP status if time's up";
@@ -885,15 +916,20 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
     $chunk = 1000;
     $beginUid = 0;
-    do_log("maxUid: $maxUid, chunk: $chunk");
+    $delayBase = $baseDuration * 2;
+    $chunkCounts = ceil($maxUid / $chunk);
+    $delay = ceil($baseDuration/$chunkCounts);
+    $i = 0;
+    do_log("maxUid: $maxUid, chunk: $chunk, chunkCounts: $chunkCounts, delayBase: $delayBase, delay: $delay");
     do {
         $command = sprintf(
-            '%s %s/artisan cleanup --action=seeding_leeching_time --begin_id=%s --end_id=%s --request_id=%s',
-            $phpPath, $webRoot, $beginUid, $beginUid + $chunk, $requestId
+            'cleanup --action=seeding_leeching_time --begin_id=%s --end_id=%s --request_id=%s --delay=%s',
+            $beginUid, $beginUid + $chunk, $requestId, $delayBase + $delay * $i
         );
-        $result = exec("$command 2>&1", $output, $result_code);
-        do_log(sprintf('command: %s, result_code: %s, result: %s, output: %s', $command, $result_code, $result, json_encode($output)));
+        $output = executeCommand($command, 'string', true);
+        do_log(sprintf('command: %s, output: %s', $command, $output));
         $beginUid += $chunk;
+        $i++;
     } while ($beginUid < $maxUid);
 
 	$log = "update total seeding and leeching time of users";

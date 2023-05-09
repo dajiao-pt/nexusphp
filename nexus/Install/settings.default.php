@@ -358,6 +358,8 @@ return array (
       'approval_status_none_visible' => 'yes',
       'nfo_view_style_default' => \App\Models\Torrent::NFO_VIEW_STYLE_DOS,
       'tax_factor' => '0.3',
+      'paid_torrent_enabled' => 'yes',
+      'max_price' => 1000000,
   ),
   'attachment' =>
   array (
@@ -443,5 +445,7 @@ return array (
         'maximum_number_of_medals_can_be_worn' => 3,
         'cookie_valid_days' => 365,
         'maximum_upload_speed' => 8000,
+        'meilisearch_enabled' => 'no',
+        'meilisearch_search_description' => 'no',
     ],
 );

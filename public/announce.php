@@ -82,7 +82,7 @@ $seeder = ($left == 0) ? "yes" : "no";
 
 // check passkey
 if (!$az = $Cache->get_value('user_passkey_'.$passkey.'_content')){
-	$res = sql_query("SELECT id, username, downloadpos, enabled, uploaded, downloaded, class, parked, clientselect, showclienterror, passkey, donor, donoruntil FROM users WHERE passkey=". sqlesc($passkey)." LIMIT 1");
+	$res = sql_query("SELECT id, username, downloadpos, enabled, uploaded, downloaded, class, parked, clientselect, showclienterror, passkey, donor, donoruntil, seedbonus FROM users WHERE passkey=". sqlesc($passkey)." LIMIT 1");
 	$az = mysql_fetch_array($res);
 	do_log("[check passkey], currentUser: " . nexus_json_encode($az));
 	$Cache->cache_value('user_passkey_'.$passkey.'_content', $az, 3600);
@@ -151,10 +151,21 @@ if ($torrent['approval_status'] != \App\Models\Torrent::APPROVAL_STATUS_ALLOW &&
         err("torrent review not approved");
     }
 }
-if ($seeder == 'no' && isset($torrent['price']) && $torrent['price'] > 0 && $torrent['owner'] != $userid) {
+if (
+    $seeder == 'no'
+    && isset($az['seedbonus'])
+    && isset($torrent['price'])
+    && $torrent['price'] > 0
+    && $torrent['owner'] != $userid
+    && get_setting("torrent.paid_torrent_enabled") == "yes"
+) {
     $hasBuy = \App\Models\TorrentBuyLog::query()->where('uid', $userid)->where('torrent_id', $torrent['id'])->exists();
     if (!$hasBuy) {
-        err("You have not purchased this torrent yet");
+        if ($az['seedbonus'] < $torrent['price']) {
+            err("Not enough bonus  to buy this paid torrent");
+        }
+        $bonusRep = new \App\Repositories\BonusRepository();
+        $bonusRep->consumeToBuyTorrent($az['id'], $torrent['id'], 'Web');
     }
 }
 
@@ -177,7 +188,7 @@ if ($newnumpeers > $rsize)
 else $limit = "";
 $announce_wait = \App\Repositories\TrackerRepository::MIN_ANNOUNCE_WAIT_SECOND;
 
-$fields = "seeder, peer_id, ip, ipv4, ipv6, port, uploaded, downloaded, last_action, UNIX_TIMESTAMP(last_action) as last_action_unix_timestamp, prev_action, (".TIMENOW." - UNIX_TIMESTAMP(last_action)) AS announcetime, UNIX_TIMESTAMP(prev_action) AS prevts";
+$fields = "id, seeder, peer_id, ip, ipv4, ipv6, port, uploaded, downloaded, userid, last_action, UNIX_TIMESTAMP(last_action) as last_action_unix_timestamp, prev_action, (".TIMENOW." - UNIX_TIMESTAMP(last_action)) AS announcetime, UNIX_TIMESTAMP(prev_action) AS prevts";
 //$peerlistsql = "SELECT ".$fields." FROM peers WHERE torrent = ".$torrentid." AND connectable = 'yes' ".$only_leech_query.$limit;
 /**
  * return all peers,include connectable no
@@ -211,7 +222,7 @@ foreach(['info_hash', 'passkey', 'peer_id'] as $lockField) {
     $lockParams[$lockField] = $_GET[$lockField];
 }
 $lockString = http_build_query($lockParams);
-$lockKey = md5($lockString);
+$lockKey = "isReAnnounce:" . md5($lockString);
 $log .= ", [CHECK_RE_ANNOUNCE], lockString: $lockString, lockKey: $lockKey";
 $redis = $Cache->getRedis();
 if (!$redis->set($lockKey, TIMENOW, ['nx', 'ex' => 5])) {
@@ -230,7 +241,7 @@ if (isset($event) && $event == "stopped") {
         $row["peer_id"] = hash_pad($row["peer_id"]);
 
         // $peer_id is the announcer's peer_id while $row["peer_id"] is randomly selected from the peers table
-        if ($row["peer_id"] === $peer_id) {
+        if ($row["peer_id"] === $peer_id && $row['userid'] == $userid) {
             $self = $row;
             continue;
         }
@@ -275,7 +286,7 @@ if (isset($event) && $event == "stopped") {
         }
     }
 }
-$selfwhere = "torrent = $torrentid AND " . hash_where("peer_id", $peer_id);
+$selfwhere = "torrent = $torrentid AND " . hash_where("peer_id", $peer_id) . " AND userid = $userid";
 //no found in the above random selection
 if (!isset($self))
 {
@@ -380,7 +391,7 @@ else // continue an existing session
         do_log("notSeedBoxMaxSpeedMbps: $notSeedBoxMaxSpeedMbps, upSpeedMbps: $upSpeedMbps");
         if ($upSpeedMbps > $notSeedBoxMaxSpeedMbps) {
             (new \App\Repositories\UserRepository())->updateDownloadPrivileges(null, $userid, 'no', 'upload_over_speed');
-            do_log("user: $userid downloading privileges have been disabled! (over speed), notSeedBoxMaxSpeedMbps: $notSeedBoxMaxSpeedMbps > upSpeedMbps: $upSpeedMbps", 'error');
+            do_log("user: $userid downloading privileges have been disabled! (over speed), upSpeedMbps: $upSpeedMbps > notSeedBoxMaxSpeedMbps: $notSeedBoxMaxSpeedMbps", 'error');
             err("Your downloading privileges have been disabled! (over speed)");
         }
     }
@@ -497,12 +508,12 @@ if (!isset($event))
 	$event = "";
 if (isset($self) && $event == "stopped")
 {
-	sql_query("DELETE FROM peers WHERE $selfwhere") or err("D Err");
-	if (mysql_affected_rows())
+	sql_query("DELETE FROM peers WHERE id = {$self['id']}") or err("D Err");
+	if (mysql_affected_rows() && !empty($snatchInfo))
 	{
 //		$updateset[] = ($self["seeder"] == "yes" ? "seeders = seeders - 1" : "leechers = leechers - 1");
         $hasChangeSeederLeecher = true;
-		sql_query("UPDATE snatched SET uploaded = uploaded + $trueupthis, downloaded = downloaded + $truedownthis, to_go = $left, $announcetime, last_action = ".$dt." WHERE torrentid = $torrentid AND userid = $userid") or err("SL Err 1");
+		sql_query("UPDATE snatched SET uploaded = uploaded + $trueupthis, downloaded = downloaded + $truedownthis, to_go = $left, $announcetime, last_action = ".$dt." WHERE id = {$snatchInfo['id']}") or err("SL Err 1");
 	}
 }
 elseif(isset($self))
@@ -516,7 +527,7 @@ elseif(isset($self))
 		$updateset[] = "times_completed = times_completed + 1";
 	}
 
-	sql_query("UPDATE peers SET ip = ".sqlesc($ip).", port = $port, uploaded = $uploaded, downloaded = $downloaded, to_go = $left, prev_action = last_action, last_action = $dt, seeder = '$seeder', agent = ".sqlesc($agent).", is_seed_box = ". intval($isIPSeedBox) . " $finished $peerIPV46 WHERE $selfwhere") or err("PL Err 1");
+	sql_query("UPDATE peers SET ip = ".sqlesc($ip).", port = $port, uploaded = $uploaded, downloaded = $downloaded, to_go = $left, prev_action = last_action, last_action = $dt, seeder = '$seeder', agent = ".sqlesc($agent).", is_seed_box = ". intval($isIPSeedBox) . " $finished $peerIPV46 WHERE id = {$self['id']}") or err("PL Err 1");
 
 	if (mysql_affected_rows())
 	{
@@ -525,7 +536,7 @@ elseif(isset($self))
             $hasChangeSeederLeecher = true;
         }
 		if (!empty($snatchInfo)) {
-            sql_query("UPDATE snatched SET uploaded = uploaded + $trueupthis, downloaded = downloaded + $truedownthis, to_go = $left, $announcetime, last_action = ".$dt." $finished_snatched WHERE torrentid = $torrentid AND userid = $userid") or err("SL Err 2");
+            sql_query("UPDATE snatched SET uploaded = uploaded + $trueupthis, downloaded = downloaded + $truedownthis, to_go = $left, $announcetime, last_action = ".$dt." $finished_snatched WHERE id = {$snatchInfo['id']}") or err("SL Err 2");
             do_action('snatched_saved', $torrent, $snatchInfo);
             if ($event == 'completed' && $az['class'] < \App\Models\HitAndRun::MINIMUM_IGNORE_USER_CLASS && !$isDonor && isset($torrent['mode'])) {
                 //think about H&R
@@ -567,11 +578,12 @@ else
                 {
 //                    $updateset[] = ($seeder == "yes" ? "seeders = seeders + 1" : "leechers = leechers + 1");
                     $hasChangeSeederLeecher = true;
-                    $check = @mysql_fetch_row(@sql_query("SELECT COUNT(*) FROM snatched WHERE torrentid = $torrentid AND userid = $userid"));
-                    if (!$check['0'])
+//                    $check = @mysql_fetch_row(@sql_query("SELECT COUNT(*) FROM snatched WHERE torrentid = $torrentid AND userid = $userid"));
+                    $checkSnatchedRes = mysql_fetch_assoc(sql_query("SELECT id FROM snatched WHERE torrentid = $torrentid AND userid = $userid limit 1"));
+                    if (empty($checkSnatchedRes['id']))
                         sql_query("INSERT INTO snatched (torrentid, userid, ip, port, uploaded, downloaded, to_go, startdat, last_action) VALUES ($torrentid, $userid, ".sqlesc($ip).", $port, $uploaded, $downloaded, $left, $dt, $dt)") or err("SL Err 4");
                     else
-                        sql_query("UPDATE snatched SET to_go = $left, last_action = ".$dt ." WHERE torrentid = $torrentid AND userid = $userid") or err("SL Err 3.1");
+                        sql_query("UPDATE snatched SET to_go = $left, last_action = ".$dt ." WHERE id = {$checkSnatchedRes['id']}") or err("SL Err 3.1");
                 }
             } catch (\Exception $exception) {
                 do_log("[INSERT PEER] error: " . $exception->getMessage());

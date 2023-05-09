@@ -27,10 +27,10 @@ return new class extends Migration
             DB::statement($sql);
         }
 
-        $sql = "alter table peers add index idx_torrent_peer(`torrent`, `peer_id`(20))";
+        $sql = "alter table $tableName add index idx_torrent_peer(`torrent`, `peer_id`(20))";
         DB::statement($sql);
 
-        $sql = "alter table peers add index idx_peer(`peer_id`(20))";
+        $sql = "alter table $tableName add index idx_peer(`peer_id`(20))";
         DB::statement($sql);
 
     }

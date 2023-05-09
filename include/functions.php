@@ -3169,6 +3169,8 @@ function deletetorrent($id, $notify = false) {
             'comment' => '',
         ], $notify);
     }
+    $meiliSearchRep = new \App\Repositories\MeiliSearchRepository();
+    $meiliSearchRep->deleteDocuments($idArr);
 }
 
 function pager($rpp, $count, $href, $opts = array(), $pagename = "page") {
@@ -3321,10 +3323,10 @@ function genrelist($catmode = 1) {
 	global $Cache;
 	if (!$ret = $Cache->get_value('category_list_mode_'.$catmode)){
 		$ret = array();
-		$res = sql_query("SELECT id, mode, name, image FROM categories WHERE mode = ".sqlesc($catmode)." ORDER BY sort_index, id");
+		$res = sql_query("SELECT id, mode, name, image FROM categories WHERE mode = ".sqlesc($catmode)." ORDER BY sort_index desc");
 		while ($row = mysql_fetch_array($res))
 			$ret[] = $row;
-		$Cache->cache_value('category_list_mode_'.$catmode, $ret, 152800);
+		$Cache->cache_value('category_list_mode_'.$catmode, $ret, 3600);
 	}
 	return $ret;
 }
@@ -3439,6 +3441,9 @@ function torrenttable($rows, $variant = "torrent", $searchBoxId = 0) {
         $ownerIdArr[] = $row['owner'];
     }
 	unset($row);
+
+    $enableImdb = get_setting("main.showimdbinfo") == 'yes';
+    $enablePtGen = get_setting('main.enable_pt_gen_systemyes') == 'yes';
 
 	$torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($CURUSER['id'], $torrentIdArr);
     $tagRep = new \App\Repositories\TagRepository();
@@ -3719,8 +3724,9 @@ foreach ($rows as $row)
     }
 	print("</td>");
 
-    echo $torrent->renderTorrentsPageAverageRating($row);
-
+    if ($enableImdb || $enablePtGen) {
+        echo $torrent->renderTorrentsPageAverageRating($row);
+    }
 		$act = "";
 		if ($CURUSER["dlicon"] != 'no' && $CURUSER["downloadpos"] != "no")
 		$act .= "<a href=\"download.php?id=".$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".$lang_functions['title_download_torrent']."\" /></a>" ;
@@ -6159,7 +6165,7 @@ function build_search_box_category_table($mode, $checkboxValue, $categoryHrefPre
     //Category
     $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', nexus_trans('label.search_box.category'));
     /** @var \Illuminate\DataBase\Eloquent\Collection $categoryCollection */
-    $categoryCollection = $searchBox->categories;
+    $categoryCollection = $searchBox->categories()->orderBy('sort_index', 'desc')->get();
     if (!empty($options['select_unselect'])) {
         $categoryCollection->push(new \App\Models\Category(['mode' => -1]));
     }
@@ -6224,8 +6230,7 @@ TD;
             ->where(function (\Illuminate\Database\Query\Builder $query) use ($mode) {
                 return $query->where('mode', $mode)->orWhere('mode', 0);
             })
-            ->orderBy('sort_index', 'asc')
-            ->orderBy('id', 'asc')
+            ->orderBy('sort_index', 'desc')
             ->get()
         ;
         $modelName = \App\Models\SearchBox::$taxonomies[$torrentField]['model'];
@@ -6456,6 +6461,56 @@ function torrent_name_for_admin(\App\Models\Torrent|null $torrent, $withTags = f
 function username_for_admin(int $id)
 {
     return new HtmlString(get_username($id, false, true, true, true));
+}
+
+function can_view_post($uid, $post)
+{
+    static $topics = [];
+    static $protectedForumIdArr;
+    static $forumMods;
+    if (!is_array($post)) {
+        $post = \App\Models\Post::query()->findOrFail(intval($post))->toArray();
+    }
+    $topicId = $post['topicid'];
+    if (!isset($topics[$topicId])) {
+        $topics[$topicId] = \App\Models\Topic::query()->findOrFail($topicId);
+    }
+    /** @var \App\Models\Topic $topicInfo */
+    $topicInfo = $topics[$topicId];
+
+    $forumId = $topicInfo->forumid;
+
+    if (is_null($protectedForumIdArr)) {
+        $protectedForumIdArr = [];
+        $protectedForumIds = \Nexus\Database\NexusDB::remember("setting_protected_forum", 600, function () {
+            return \App\Models\Setting::getByName('misc.protected_forum');
+        });
+        $protectedForumIdArr = $protectedForumIds ? preg_split("/[,\s]+/", $protectedForumIds) : [];
+    }
+    if (is_null($forumMods)) {
+        $forumMods = [];
+        $results = \App\Models\ForumMod::query()->get();
+        foreach ($results as $item) {
+            $forumMods[$item->forumid] = $item->userid;
+        }
+    }
+    $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;
+    $log = sprintf(
+        "uid: $uid, class: %s,  post: {$post['id']}, forumId: $forumId, protectedForumIdArr: %s, forumMods: %s, isForumMod: %s",
+        get_user_class(), json_encode($protectedForumIdArr), json_encode($forumMods), $isForumMod
+    );
+    if (
+        in_array($forumId, $protectedForumIdArr)
+        && get_user_class() < \App\Models\User::CLASS_ADMINISTRATOR
+        && $uid != $post['userid']
+        && $uid != $topicInfo->userid
+        && !$isForumMod
+    ) {
+        do_log("$log, FALSE");
+        return false;
+    }
+    do_log("$log, TRUE");
+    return true;
 }
 
 ?>
