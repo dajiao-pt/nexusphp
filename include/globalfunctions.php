@@ -1070,8 +1070,12 @@ function clear_inbox_count_cache($uid)
 function clear_agent_allow_deny_cache()
 {
     do_log("clear_agent_allow_deny_cache");
-    \Nexus\Database\NexusDB::cache_del("all_agent_allows");
-    \Nexus\Database\NexusDB::cache_del("all_agent_denies");
+    $allowCacheKey = nexus_env("CACHE_KEY_AGENT_ALLOW", "all_agent_allows");
+    $denyCacheKey = nexus_env("CACHE_KEY_AGENT_DENY", "all_agent_denies");
+    foreach (["", ":php", ":go"] as $suffix) {
+        \Nexus\Database\NexusDB::cache_del($allowCacheKey . $suffix);
+        \Nexus\Database\NexusDB::cache_del($denyCacheKey . $suffix);
+    }
 }
 
 
@@ -1085,6 +1089,9 @@ function user_can($permission, $fail = false, $uid = 0): bool
         $log .= ", set current uid: $uid";
     }
     if ($uid <= 0) {
+        if ($fail) {
+            goto FAIL;
+        }
         do_log("$log, unauthenticated, false");
         return false;
     }
@@ -1111,6 +1118,7 @@ function user_can($permission, $fail = false, $uid = 0): bool
         $userCanCached[$permission][$uid] = $result;
         return $result;
     }
+    FAIL:
     do_log("$log, [FAIL]");
     if (IN_NEXUS && !IN_TRACKER) {
         global $lang_functions;
@@ -1123,6 +1131,8 @@ function user_can($permission, $fail = false, $uid = 0): bool
     }
     throw new \App\Exceptions\InsufficientPermissionException();
 }
+
+
 
 function is_donor(array $userInfo): bool
 {

@@ -97,8 +97,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $rep = new MeiliSearchRepository();
-        $rep->import();
+        $r = number_format(12356);
+        dd($r);
     }
 
 }
