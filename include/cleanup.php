@@ -306,7 +306,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
     $requestId = nexus()->getRequestId();
     $maxUidRes = mysql_fetch_assoc(sql_query("select max(id) as max_uid from users limit 1"));
 	$maxUid = $maxUidRes['max_uid'];
-	$chunk = 1000;
+	$chunk = 10000;
 	$beginUid = 0;
     $chunkCounts = ceil($maxUid / $chunk);
     $delay = ceil($baseDuration/$chunkCounts);
