@@ -50,6 +50,7 @@ $lang_functions = array
 	'text_home' => "Home",
 	'text_forums' => "Forums",
 	'text_torrents' => "Torrents",
+	'text_official_torrents' => "OfficialTorrents",
 	'text_torrents_movies' => "Movies",
 	'text_torrents_tvseries' => "TV Series",
 	'text_torrents_anime' => "Animations",

@@ -2289,6 +2289,10 @@ function menu ($selected = "home") {
 		$selected = "forums";
 	}elseif (preg_match("/torrents/i", $script_name)) {
 		$selected = "torrents";
+		$url = $_SERVER["REQUEST_URI"];
+		if (preg_match("/tag_id=3/i", $url)){
+			$selected = "official_torrents";
+		}
 	}elseif (preg_match("/special/i", $script_name)) {
 		$selected = "special";
 	}elseif (preg_match("/offers/i", $script_name) OR preg_match("/offcomment/i", $script_name)) {
@@ -2342,6 +2346,7 @@ function menu ($selected = "home") {
 		<li><a href=\"torrents.php?cat=409\" >".$lang_functions['text_torrents_music']."</a></li>
 		<li><a href=\"torrents.php?cat=412\" >".$lang_functions['text_torrents_audiobook']."</a></li>
 		</ul></li>");
+		print ("<li " . ($selected == "official_torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php?tag_id=3\" rel='sub_menu'>".$lang_functions['text_official_torrents']."</a>");
 		if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
         if ($enableoffer == 'yes')
@@ -2349,7 +2354,7 @@ function menu ($selected = "home") {
         if ($enablerequest == 'yes')
             print ("<li" . ($selected == "requests" ? " class=\"selected\"" : "") . "><a href=\"viewrequests.php\">".$lang_functions['text_request']."</a></li>");
         print ("<li" . ($selected == "upload" ? " class=\"selected\"" : "") . "><a href=\"upload.php\">".$lang_functions['text_upload']."</a></li>");
-        print ("<li" . ($selected == "subtitles" ? " class=\"selected\"" : "") . "><a href=\"subtitles.php\">".$lang_functions['text_subtitles']."</a></li>");
+        // print ("<li" . ($selected == "subtitles" ? " class=\"selected\"" : "") . "><a href=\"subtitles.php\">".$lang_functions['text_subtitles']."</a></li>");
         //	print ("<li" . ($selected == "usercp" ? " class=\"selected\"" : "") . "><a href=\"usercp.php\">".$lang_functions['text_user_cp']."</a></li>");
         if (user_can('topten')) {
             print ("<li" . ($selected == "topten" ? " class=\"selected\"" : "") . "><a href=\"topten.php\">".$lang_functions['text_top_ten']."</a></li>");
