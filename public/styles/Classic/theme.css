@@ -468,7 +468,7 @@ ul.menu li a:visited {
 ul.menu li a:hover {
   color: #a038b0c7;
   text-decoration: none;
-  transform: scale(1.4);
+  /* transform: scale(1.4); */
 }
 ul.menu li a:active {
   color: #8c21ea;
@@ -477,7 +477,7 @@ ul.menu > li.selected > a {
   background-image: url(./shadeactive.gif);
   background-color: #ffffff;
   border-bottom-color: white;
-  font: bold 24px verdana;
+  font: bold 19px verdana;
   position: relative;
   top: 1px;
 }
