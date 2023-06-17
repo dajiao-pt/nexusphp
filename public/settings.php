@@ -41,7 +41,7 @@ if ($action == 'savesettings_main')	// save main
 		'showpolls','showstats','showlastxtorrents', 'showtrackerload','showshoutbox','showfunbox','showoffer','sptime','showhelpbox','enablebitbucket',
 		'smalldescription','altname','extforum','extforumurl','defaultlang','defstylesheet', 'donation','spsct','browsecat','specialcat','waitsystem',
 		'maxdlsystem','bitbucket','torrentnameprefix', 'showforumstats','verification','invite_count','invite_timeout', 'seeding_leeching_time_calc_start',
-		'startsubid', 'banner_img', 'banner_link', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'imdb_language', 'offer_skip_approved_count',
+		'startsubid', 'banner_img', 'banner_link', 'background_image', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'imdb_language', 'offer_skip_approved_count',
         'upload_deny_approval_deny_count', 'enable_global_search', 'tmp_invite_count',
 	);
 	GetVar($validConfig);
@@ -794,6 +794,7 @@ elseif ($action == 'mainsettings')	// main settings
 
 	tr($lang_settings['row_site_banner_img'],"<input type='text' style=\"width: 500px\" name='banner_img' value='".($MAIN["banner_img"] ? $MAIN["banner_img"] : "")."'>".$lang_settings['text_site_banner_img_note'], 1);
 	tr($lang_settings['row_site_banner_link'],"<input type='text' style=\"width: 500px\" name='banner_link' value='".($MAIN["banner_link"] ? $MAIN["banner_link"] : "")."'>".$lang_settings['text_site_banner_link_note'], 1);
+	tr($lang_settings['row_site_background_image'],"<input type='text' style=\"width: 500px\" name='background_image' value='".($MAIN["background_image"] ? $MAIN["background_image"] : "")."'>".$lang_settings['row_site_background_image_note'], 1);
 	yesorno($lang_settings['row_site_online'], 'site_online', $MAIN['site_online'], $lang_settings['text_site_online_note']);
 	yesorno($lang_settings['row_enable_invite_system'], 'invitesystem', $MAIN['invitesystem'], $lang_settings['text_invite_system_note']);
 	tr($lang_settings['row_initial_uploading_amount'],"<input type='text' name=iniupload style=\"width: 100px\" value={$MAIN['iniupload']}> ".$lang_settings['text_initial_uploading_amount_note'], 1);

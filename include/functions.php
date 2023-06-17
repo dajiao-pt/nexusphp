@@ -2472,7 +2472,7 @@ function getOpenHtmlTag_A($link){
 function stdhead($title = "", $msgalert = true, $script = "", $place = "")
 {
 	global $lang_functions;
-	global $CURUSER, $CURLANGDIR, $USERUPDATESET, $iplog1, $oldip, $SITE_ONLINE, $FUNDS, $SITENAME, $SLOGAN, $logo_main, $banner_img, $banner_link, $BASEURL, $offlinemsg,$enabledonation, $staffmem_class, $titlekeywords_tweak, $metakeywords_tweak, $metadescription_tweak, $cssdate_tweak, $deletenotransfertwo_account, $neverdelete_account, $iniupload_main;
+	global $CURUSER, $CURLANGDIR, $USERUPDATESET, $iplog1, $oldip, $SITE_ONLINE, $FUNDS, $SITENAME, $SLOGAN, $logo_main, $banner_img, $banner_link, $background_image, $BASEURL, $offlinemsg,$enabledonation, $staffmem_class, $titlekeywords_tweak, $metakeywords_tweak, $metadescription_tweak, $cssdate_tweak, $deletenotransfertwo_account, $neverdelete_account, $iniupload_main;
 	global $tstart;
 	global $Cache;
 	global $Advertisement;
@@ -2575,8 +2575,21 @@ foreach (\Nexus\Nexus::getAppendHeaders() as $value) {
 <script type="text/javascript" src="js/jquery-1.12.4.min.js<?php echo $cssupdatedate?>"></script>
 <script type="text/javascript">jQuery.noConflict();</script>
 <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js<?php echo $cssupdatedate?>"></script>
-</head>
+</head>	
+<?php
+if ($background_image == "")
+{
+?>
 <body>
+<?php
+}
+else
+{
+?>
+<body style="background-image:url(<?php echo $background_image?>);">
+<?php
+}
+?>
 <table class="head" cellspacing="0" cellpadding="0" align="center" style="width: <?php echo isset($GLOBALS['CURUSER']) ? CONTENT_WIDTH + 28.66 : CONTENT_WIDTH ?>px">
 	<tr>
 		<td class="clear">
