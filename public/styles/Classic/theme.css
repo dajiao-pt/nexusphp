@@ -105,6 +105,8 @@ h1 {
 }
 h2 {
   margin-bottom: 6px;
+  text-align: center;
+  font-size: large;
 }
 h2.transparentbg {
   background-color: transparent;
@@ -185,8 +187,10 @@ td.comment {
 td.colhead {
   white-space: nowrap;
   font-weight: bold;
-  color: #ffffff77;
-  background-color: #d365e642;
+  background-color: rgba(77,77,77,0.2);
+  font-size: 17px;
+  font-family: serif;
+  border-radius: 1px;
 }
 .nowrap {
   white-space: nowrap;
@@ -214,7 +218,7 @@ table.torrents td.rowfollow {
   text-align: center;
 }
 table.torrents > tbody > tr:hover {
-  background-color: rgba(193, 31, 211, 0.75) !important;
+  background-color: rgba(163, 194, 188, 0.75) !important;
 }
 td.toolbox {
 }
@@ -439,9 +443,9 @@ ul.menu li {
   margin-right: 0px;
 }
 ul.menu li a {
-  padding-right: 7px;
-  padding-left: 7px;
-  background-color: #f9d2fb;
+  padding-right: 10px;
+  padding-left: 10px;
+  /* background-color: #22DDBB;*/
   padding-bottom: 3px;
   margin-right: 3px;
   padding-top: 3px;
@@ -450,13 +454,13 @@ ul.menu li a {
   font-size: 19px;
   font-style: normal;
   font-weight: 600;
-  font-family: Arial;
-  font-variant: normal;
+  font-family: cursive;
+  font-variant: full-width;
   text-align: center;
   display: inline-block;
   transition: color 0.5s;
   transition: transform 0.3s;
-  border-radius: 16px;
+  border-radius: 2px;
 }
 ul.menu li a:link {
   color: #2d2b2b;
@@ -465,7 +469,7 @@ ul.menu li a:visited {
   color: #2d2b2b;
 }
 ul.menu li a:hover {
-  color: #a038b0c7;
+  color: red;
   text-decoration: none;
   /* transform: scale(1.4); */
 }
@@ -473,12 +477,23 @@ ul.menu li a:active {
   color: #8c21ea;
 }
 ul.menu > li.selected > a {
-  background-image: url(./shadeactive.gif);
-  background-color: #ffffff;
-  border-bottom-color: white;
-  font: bold 19px verdana;
+  /*background-image: url(./shadeactive.gif);*/
+  /*background-color: #ffffff;*/
+  /*border-bottom-color: white;*/
+  font: bold 22px verdana;
+  font-family: cursive;
   position: relative;
   top: 1px;
+  color: #F84519;
+  padding-right: 10px;
+  padding-left: 10px;
+  padding-bottom: 3px;
+  margin-right: 3px;
+  padding-top: 3px;
+  border-bottom: none;
+  text-decoration: none;
+}
+
 }
 ul.menu > li.selected > a:hover {
   text-decoration: none;
@@ -493,6 +508,8 @@ ul.menu li ul {
   padding: 0;
   display: none;
   position: absolute;
+  background: rgba(173,252,252,0.3);
+  border-radius: 10px;
 }
 
 ul.menu li ul li {
