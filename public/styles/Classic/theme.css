@@ -377,13 +377,22 @@ ul {
   margin-bottom: 0px;
 }
 img {
-  border: 0;
+    border: 0;
+    transition: filter 0.7s,transform 0.3s;
+}
+img:hover {
+    filter: brightness(1.1);
+    transform: scale(1.03);
 }
 img.border {
   border-right: #000000 1px solid;
   border-top: #000000 1px solid;
   border-left: #000000 1px solid;
   border-bottom: #000000 1px solid;
+}
+img.nexus-lazy-load.preview {
+    filter: brightness(1);
+    transform: scale(1);
 }
 .gobutton {
   background: #00ff95;
