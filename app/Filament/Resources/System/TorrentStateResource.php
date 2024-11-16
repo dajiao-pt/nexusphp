@@ -66,6 +66,8 @@ class TorrentStateResource extends Resource
                 Tables\Actions\EditAction::make()->after(function () {
                     do_log("cache_del: global_promotion_state");
                     NexusDB::cache_del(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY);
+                    do_log("publish_model_event: global_promotion_state_updated");
+                    publish_model_event("global_promotion_state_updated", 0);
                 }),
 //                Tables\Actions\DeleteAction::make(),
             ])

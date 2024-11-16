@@ -23,6 +23,16 @@ class Plugin
         return !empty(self::$providers[$name]['providers']);
     }
 
+    public static function listEnabled(): array
+    {
+        $result = [];
+        //plugins are more exactly
+        foreach (self::$plugins as $id => $plugin) {
+            $result[$id] = 1;
+        }
+        return $result;
+    }
+
     public static function getById($id) :BasePlugin|null
     {
         return self::$plugins[$id] ?? null;

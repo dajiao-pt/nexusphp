@@ -101,8 +101,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $tool = new TrackerRepository();
-        $result = $tool->checkStatus();
+        $result = \Nexus\Plugin\Plugin::listEnabled();
         dd($result);
     }
 
