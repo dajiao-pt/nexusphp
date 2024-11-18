@@ -70,7 +70,7 @@ if ($row['anonymous'] == 'yes' && $CURUSER["id"] == $row["owner"]) {
 KPS("-",$uploadtorrent_bonus,$row["owner"]);
 
 //Send pm to torrent uploader
-if ($CURUSER["id"] != $row["owner"]){
+if ($CURUSER["id"] != $row["owner"] && \App\Models\User::exists($row["owner"])){
 	$dt = sqlesc(date("Y-m-d H:i:s"));
 	$subject = sqlesc($lang_delete_target[get_user_lang($row["owner"])]['msg_torrent_deleted']);
 	$msg = sqlesc($lang_delete_target[get_user_lang($row["owner"])]['msg_the_torrent_you_uploaded'].$row['name'].$lang_delete_target[get_user_lang($row["owner"])]['msg_was_deleted_by']."[url=userdetails.php?id=".$CURUSER['id']."]".$CURUSER['username']."[/url]".$lang_delete_target[get_user_lang($row["owner"])]['msg_reason_is'].$reasonstr);

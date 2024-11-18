@@ -137,6 +137,11 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $result;
     }
 
+    public static function exists($id): bool
+    {
+        return self::query()->where("id", $id)->exists();
+    }
+
     public function canAccessFilament(): bool
     {
         return $this->canAccessAdmin();
