@@ -857,6 +857,31 @@ function do_action($name, ...$args)
     return $hook->doAction(...func_get_args());
 }
 
+function isIPSeedBoxFromASN($ip): bool
+{
+   try {
+       static $reader;
+       $database = nexus_env('GEOIP2_ASN_DATABASE');
+       if (!file_exists($database) || !is_readable($database)) {
+           do_log("GEOIP2_ASN_DATABASE: $database not exists or not readable", "debug");
+           return false;
+       }
+       if (is_null($reader)) {
+           $reader = new \GeoIp2\Database\Reader($database);
+       }
+       $asnObj = $reader->asn($ip);
+       $asn = $asnObj->autonomousSystemNumber;
+       if ($asn <= 0) {
+           return false;
+       }
+       $row = \Nexus\Database\NexusDB::getOne("seed_box_records", "asn = $asn", "id");
+       return !empty($row);
+   } catch (\Throwable $throwable) {
+       do_log("ip: $ip, error: " . $throwable->getMessage(), "error");
+       return false;
+   }
+}
+
 function isIPSeedBox($ip, $uid, $withoutCache = false): bool
 {
     $key = "nexus_is_ip_seed_box:ip:$ip:uid:$uid";
@@ -865,22 +890,30 @@ function isIPSeedBox($ip, $uid, $withoutCache = false): bool
         do_log("$key, get result from cache: $cacheData(" . gettype($cacheData) . ")");
         return (bool)$cacheData;
     }
+    //check from asn
+    $res = isIPSeedBoxFromASN($ip);
+    if (!empty($res)) {
+        \Nexus\Database\NexusDB::cache_put($key, 1, 300);
+        do_log("$key, get result from asn, true");
+        return true;
+    }
+
     $ipObject = \PhpIP\IP::create($ip);
     $ipNumeric = $ipObject->numeric();
     $ipVersion = $ipObject->getVersion();
     //check allow list first, not consider specific user
     $checkSeedBoxAllowedSql = sprintf(
-        'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `version` = %s and `status` = %s and `is_allowed` = 1 limit 1',
+        'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `version` = %s and `status` = %s and `is_allowed` = 1 and asn = 0 limit 1',
         $ipNumeric, $ipNumeric, $ipVersion, \App\Models\SeedBoxRecord::STATUS_ALLOWED
     );
     $res = \Nexus\Database\NexusDB::select($checkSeedBoxAllowedSql);
     if (!empty($res)) {
-        \Nexus\Database\NexusDB::cache_put($key, 1, 300);
+        \Nexus\Database\NexusDB::cache_put($key, 0, 300);
         do_log("$key, get result from database, is_allowed = 1, false");
         return false;
     }
     $checkSeedBoxAdminSql = sprintf(
-        'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `type` = %s and `version` = %s and `status` = %s and `is_allowed` = 0 limit 1',
+        'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `type` = %s and `version` = %s and `status` = %s and `is_allowed` = 0 and asn = 0 limit 1',
         $ipNumeric, $ipNumeric, \App\Models\SeedBoxRecord::TYPE_ADMIN, $ipVersion, \App\Models\SeedBoxRecord::STATUS_ALLOWED
     );
     $res = \Nexus\Database\NexusDB::select($checkSeedBoxAdminSql);
@@ -891,7 +924,7 @@ function isIPSeedBox($ip, $uid, $withoutCache = false): bool
     }
     if ($uid !== null) {
         $checkSeedBoxUserSql = sprintf(
-            'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `uid` = %s and `type` = %s and `version` = %s and `status` = %s and `is_allowed` = 0  limit 1',
+            'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `uid` = %s and `type` = %s and `version` = %s and `status` = %s and `is_allowed` = 0 and asn = 0  limit 1',
             $ipNumeric, $ipNumeric, $uid, \App\Models\SeedBoxRecord::TYPE_USER, $ipVersion, \App\Models\SeedBoxRecord::STATUS_ALLOWED
         );
         $res = \Nexus\Database\NexusDB::select($checkSeedBoxUserSql);

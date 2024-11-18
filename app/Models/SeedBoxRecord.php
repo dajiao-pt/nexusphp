@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class SeedBoxRecord extends NexusModel
 {
     protected $fillable = ['type', 'uid', 'status', 'operator', 'bandwidth', 'ip', 'ip_begin', 'ip_end', 'ip_begin_numeric', 'ip_end_numeric',
-        'comment', 'version', 'is_allowed',
+        'comment', 'version', 'is_allowed', 'asn'
     ];
 
     public $timestamps = true;

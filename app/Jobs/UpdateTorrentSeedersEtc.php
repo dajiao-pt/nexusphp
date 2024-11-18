@@ -42,16 +42,6 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         $this->requestId = $requestId;
     }
 
-    /**
-     * Determine the time at which the job should timeout.
-     *
-     * @return \DateTime
-     */
-    public function retryUntil()
-    {
-        return now()->addSeconds(Setting::get('main.autoclean_interval_three'));
-    }
-
     public $tries = 1;
 
     public $timeout = 1800;

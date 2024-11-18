@@ -42,16 +42,6 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
         $this->requestId = $requestId;
     }
 
-    /**
-     * Determine the time at which the job should timeout.
-     *
-     * @return \DateTime
-     */
-    public function retryUntil()
-    {
-        return now()->addSeconds(Setting::get('main.autoclean_interval_four'));
-    }
-
     public $tries = 1;
 
     public $timeout = 3600;
@@ -102,8 +92,8 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
         $count = 0;
         foreach ($res as $row) {
             $count++;
-            $seedtimeUpdates = sprintf("when %d then %d", $row->userid, $row->seedtime_sum ?? 0);
-            $leechTimeUpdates = sprintf("when %d then %d", $row->userid, $row->leechtime_sum ?? 0);
+            $seedtimeUpdates[] = sprintf("when %d then %d", $row->userid, $row->seedtime_sum ?? 0);
+            $leechTimeUpdates[] = sprintf("when %d then %d", $row->userid, $row->leechtime_sum ?? 0);
         }
         $sql = sprintf(
             "update users set seedtime = case id %s end, leechtime = case id %s end, seed_time_updated_at = '%s' where id in (%s)",

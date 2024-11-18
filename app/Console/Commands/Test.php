@@ -101,8 +101,12 @@ class Test extends Command
      */
     public function handle()
     {
-        $result = \Nexus\Plugin\Plugin::listEnabled();
-        dd($result);
+        $file = resource_path("geoip/GeoLite2-ASN.mmdb");
+        $file = resource_path("geoip/GeoLite2-City.mmdb");
+        $reader = new Reader($file);
+        $asn = $reader->asn("94.16.120.0");
+//        $result = \Nexus\Plugin\Plugin::listEnabled();
+        dd($asn);
     }
 
 }

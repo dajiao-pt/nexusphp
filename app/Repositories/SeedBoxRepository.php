@@ -40,7 +40,13 @@ class SeedBoxRepository extends BaseRepository
 
     private function formatParams(array $params): array
     {
-        if (!empty($params['ip']) && empty($params['ip_begin']) && empty($params['ip_end'])) {
+        $params = array_filter($params);
+        if (
+            !empty($params['ip'])
+            && empty($params['ip_begin'])
+            && empty($params['ip_end'])
+            && empty($params['asn'])
+        ) {
             try {
                 $ipBlock = IPBlock::create($params['ip']);
                 $params['ip_begin_numeric'] = $ipBlock->getFirstIp()->numeric();
@@ -62,8 +68,12 @@ class SeedBoxRepository extends BaseRepository
             if (empty($params['version'])) {
                 throw new \InvalidArgumentException("Invalid IPBlock or IP: " . $params['ip']);
             }
-
-        } elseif (empty($params['ip']) && !empty($params['ip_begin']) && !empty($params['ip_end'])) {
+        } elseif (
+            empty($params['ip'])
+            && empty($params['asn'])
+            && !empty($params['ip_begin'])
+            && !empty($params['ip_end'])
+        ) {
             $ipBegin = IP::create($params['ip_begin']);
             $params['ip_begin_numeric'] = $ipBegin->numeric();
 
@@ -73,6 +83,13 @@ class SeedBoxRepository extends BaseRepository
                 throw new \InvalidArgumentException("ip_begin/ip_end must be the same version");
             }
             $params['version'] = $ipEnd->getVersion();
+        } elseif (
+            !empty($params['asn'])
+            && empty($params['ip'])
+            && empty($params['ip_begin'])
+            && empty($params['ip_end'])
+        ) {
+            do_log("only asn: " . $params['asn']);
         } else {
             throw new \InvalidArgumentException(nexus_trans('label.seed_box_record.ip_help'));
         }
