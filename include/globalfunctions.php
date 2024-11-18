@@ -788,6 +788,15 @@ function get_user_id()
     return auth()->user()->id ?? 0;
 }
 
+function get_user_passkey()
+{
+    if (IN_NEXUS) {
+        global $CURUSER;
+        return $CURUSER["passkey"] ?? "";
+    }
+    return auth()->user()->passkey ?? "";
+}
+
 function get_pure_username()
 {
     if (IN_NEXUS) {
@@ -928,13 +937,13 @@ function getDataTraffic(array $torrent, array $queries, array $user, $peer, $sna
         }
         $uploaderRatio = get_setting('torrent.uploaderdouble');
         $log .= ", uploaderRatio: $uploaderRatio";
-        if ($torrent['owner'] == $user['id']) {
+        if ($torrent['owner'] == $user['id'] && $uploaderRatio != 1) {
             //uploader, use the bigger one
             $upRatio = max($uploaderRatio, \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier']);
-            $log .= ", [IS_UPLOADER], upRatio: $upRatio";
+            $log .= ", [IS_UPLOADER] && uploaderRatio != 1, upRatio: $upRatio";
         } else {
             $upRatio = \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier'];
-            $log .= ", [IS_NOT_UPLOADER], upRatio: $upRatio";
+            $log .= ", [IS_NOT_UPLOADER] || uploaderRatio == 1, upRatio: $upRatio";
         }
         /**
          * VIP do not calculate downloaded
@@ -1238,6 +1247,9 @@ function get_snatch_info($torrentId, $userId)
     return mysql_fetch_assoc(sql_query(sprintf('select * from snatched where torrentid = %s and userid = %s order by id desc limit 1', $torrentId, $userId)));
 }
 
+/**
+ * 完整的 Laravel 事件, 在 php 端有监听者的需要触发. 同样会执行 publish_model_event()
+ */
 function fire_event(string $name, \Illuminate\Database\Eloquent\Model $model, \Illuminate\Database\Eloquent\Model $oldModel = null): void
 {
     $prefix = "fire_event:";
@@ -1249,4 +1261,22 @@ function fire_event(string $name, \Illuminate\Database\Eloquent\Model $model, \I
         \Nexus\Database\NexusDB::cache_put($idKeyOld, serialize($oldModel), 3600*24*30);
     }
     executeCommand("event:fire --name=$name --idKey=$idKey --idKeyOld=$idKeyOld", "string", true, false);
+}
+
+/**
+ * 仅仅是往 redis 发布事件, php 端无监听者仅在其他平台有需要的触发这个即可, 较轻量
+ */
+function publish_model_event(string $event, int $id): void
+{
+    $channel = nexus_env("CHANNEL_NAME_MODEL_EVENT");
+    if (!empty($channel)) {
+        \Nexus\Database\NexusDB::redis()->publish($channel, json_encode(["event" => $event, "id" => $id]));
+    } else {
+        do_log("event: $event, id: $id, channel: $channel, channel is empty!", "error");
+    }
+}
+
+function convertNamespaceToSnake(string $str): string
+{
+    return str_replace(["\\", "::"], ["_", "."], $str);
 }

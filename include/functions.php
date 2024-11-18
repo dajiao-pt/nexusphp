@@ -818,7 +818,7 @@ function closeall() {
 			tagRemove = popstack(bbtags)
 			if ( (tagRemove != 'color') ) {
 				doInsert("[/"+tagRemove+"]", "", false);
-				eval("document.<?php echo $form?>." + tagRemove + ".value = ' " + tagRemove + " '");
+				eval("document.<?php echo $form?>." + tagRemove + ".value = ' " + tagRemove.toUpperCase() + " '");
 				eval(tagRemove + "_open = 0");
 			} else {
 				doInsert("[/"+tagRemove+"]", "", false);
@@ -2798,6 +2798,8 @@ if ($msgalert)
 		$text = $lang_functions['text_you_have'].$unread.$lang_functions['text_new_message'] . add_s($unread) . $lang_functions['text_click_here_to_read'];
 		msgalert("messages.php",$text, "red");
 	}
+    \App\Utils\MsgAlert::getInstance()->render();
+
 /*
 	$pending_invitee = $Cache->get_value('user_'.$CURUSER["id"].'_pending_invitee_count');
 	if ($pending_invitee == ""){
@@ -3280,7 +3282,7 @@ function commenttable($rows, $type, $parent_id, $review = false)
 		$dt = sqlesc(date("Y-m-d H:i:s",(TIMENOW - $secs))); // calculate date.
 		print("<tr>\n");
 		print("<td class=\"rowfollow\" width=\"150\" valign=\"top\" style=\"padding: 0px;\">".return_avatar_image($avatar)."</td>\n");
-		print("<td class=\"rowfollow\" valign=\"top\"><br />".$text.$text_editby."</td>\n");
+		print("<td class=\"rowfollow word-break-all\" valign=\"top\"><br />".$text.$text_editby."</td>\n");
 		print("</tr>\n");
 		$actionbar = "<a href=\"comment.php?action=add&amp;sub=quote&amp;cid=".$row['id']."&amp;pid=".$parent_id."&amp;type=".$type."\"><img class=\"f_quote\" src=\"pic/trans.gif\" alt=\"Quote\" title=\"".$lang_functions['title_reply_with_quote']."\" /></a>".
 		"<a href=\"comment.php?action=add&amp;pid=".$parent_id."&amp;type=".$type."\"><img class=\"f_reply\" src=\"pic/trans.gif\" alt=\"Add Reply\" title=\"".$lang_functions['title_add_reply']."\" /></a>".(user_can('commanage') ? "<a href=\"comment.php?action=delete&amp;cid=".$row['id']."&amp;type=".$type."\"><img class=\"f_delete\" src=\"pic/trans.gif\" alt=\"Delete\" title=\"".$lang_functions['title_delete']."\" /></a>" : "").($row["user"] == $CURUSER["id"] || get_user_class() >= $commanage_class ? "<a href=\"comment.php?action=edit&amp;cid=".$row['id']."&amp;type=".$type."\"><img class=\"f_edit\" src=\"pic/trans.gif\" alt=\"Edit\" title=\"".$lang_functions['title_edit']."\" />"."</a>" : "");
@@ -5319,7 +5321,7 @@ function torrentTags($tags = 0, $type = 'checkbox')
     return $html;
 }
 
-function saveSetting($prefix, $nameAndValue, $autoload = 'yes')
+function saveSetting(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
 {
     $prefix = strtolower($prefix);
     $datetimeNow = date('Y-m-d H:i:s');
@@ -5907,7 +5909,11 @@ function get_ip_location_from_geoip($ip): bool|array
 function msgalert($url, $text, $bgcolor = "red")
 {
     print("<table border=\"0\" cellspacing=\"0\" cellpadding=\"10\"><tr><td style='border: none; padding: 10px; background: ".$bgcolor."'>\n");
-    print("<b><a href=\"".$url."\" target='_blank'><font color=\"white\">".$text."</font></a></b>");
+    if (!empty($url)) {
+        print("<b><a href=\"".$url."\" target='_blank'><font color=\"white\">".$text."</font></a></b>");
+    } else {
+        print("<b><font color=\"white\">".$text."</font></b>");
+    }
     print("</td></tr></table><br />");
 }
 
@@ -6078,7 +6084,7 @@ function calculate_seed_bonus($uid, $torrentIdArr = null): array
         do_log(sprintf(
             "$logPrefix, torrent: %s, peer ID: %s, weeks: %s, size_raw: %s GB, size: %s GB, increase A: %s, increase official A: %s",
             $torrent['id'], $torrent['peerID'], $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease
-        ));
+        ), "debug");
     }
     if ($count > $maxseeding_bonus)
         $count = $maxseeding_bonus;
@@ -6315,7 +6321,7 @@ function build_bonus_table(array $user, array $bonusResult = [], array $options 
     $isDonor = is_donor($user);
     $donortimes_bonus = get_setting('bonus.donortimes');
     $baseBonusFactor = 1;
-    if ($isDonor) {
+    if ($isDonor && $donortimes_bonus != 0) {
         $baseBonusFactor = $donortimes_bonus;
     }
     $baseBonus = $bonusResult['seed_bonus'] * $baseBonusFactor;

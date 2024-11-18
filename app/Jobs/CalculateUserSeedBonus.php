@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
@@ -56,6 +57,16 @@ class CalculateUserSeedBonus implements ShouldQueue
     public $timeout = 3600;
 
     /**
+     * 获取任务时，应该通过的中间件。
+     *
+     * @return array
+     */
+    public function middleware()
+    {
+        return [new WithoutOverlapping($this->idRedisKey)];
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
@@ -63,7 +74,11 @@ class CalculateUserSeedBonus implements ShouldQueue
     public function handle()
     {
         $beginTimestamp = time();
-        $logPrefix = sprintf("[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s", $this->requestId, $this->beginUid, $this->endUid);
+        $logPrefix = sprintf(
+            "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s, idStr: %s, idRedisKey: %s",
+            $this->requestId, $this->beginUid, $this->endUid, $this->idStr, $this->idRedisKey
+        );
+        do_log("$logPrefix, job start ...");
         $haremAdditionFactor = Setting::get('bonus.harem_addition');
         $officialAdditionFactor = Setting::get('bonus.official_addition');
         $donortimes_bonus = Setting::get('bonus.donortimes');
@@ -84,6 +99,8 @@ class CalculateUserSeedBonus implements ShouldQueue
         $logFile = getLogFile("seed-bonus-points");
         do_log("$logPrefix, [GET_UID_REAL], count: " . count($results) . ", logFile: $logFile");
         $fd = fopen($logFile, 'a');
+        $seedPointsUpdates = $seedPointsPerHourUpdates = $seedBonusUpdates = [];
+        $logStr = "";
         foreach ($results as $userInfo)
         {
             $uid = $userInfo['id'];
@@ -92,7 +109,7 @@ class CalculateUserSeedBonus implements ShouldQueue
             $bonusLog = "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_USER], user: $uid, seedBonusResult: " . nexus_json_encode($seedBonusResult);
             $all_bonus = $seedBonusResult['seed_bonus'];
             $bonusLog .= ", all_bonus: $all_bonus";
-            if ($isDonor) {
+            if ($isDonor && $donortimes_bonus != 0) {
                 $all_bonus = $all_bonus * $donortimes_bonus;
                 $bonusLog .= ", isDonor, donortimes_bonus: $donortimes_bonus, all_bonus: $all_bonus";
             }
@@ -112,13 +129,17 @@ class CalculateUserSeedBonus implements ShouldQueue
                 $all_bonus += $medalAddition;
                 $bonusLog .= ", medalAdditionFactor: {$seedBonusResult['medal_additional_factor']}, medalBonus: {$seedBonusResult['medal_bonus']}, medalAddition: $medalAddition, all_bonus: $all_bonus";
             }
+            do_log($bonusLog);
             $dividend = 3600 / $autoclean_interval_one;
             $all_bonus = $all_bonus / $dividend;
             $seed_points = $seedBonusResult['seed_points'] / $dividend;
-            $updatedAt = now()->toDateTimeString();
-            $sql = "update users set seed_points = ifnull(seed_points, 0) + $seed_points, seed_points_per_hour = {$seedBonusResult['seed_points']}, seedbonus = seedbonus + $all_bonus, seed_points_updated_at = '$updatedAt' where id = $uid limit 1";
-            do_log("$bonusLog, query: $sql");
-            NexusDB::statement($sql);
+//            $updatedAt = now()->toDateTimeString();
+//            $sql = "update users set seed_points = ifnull(seed_points, 0) + $seed_points, seed_points_per_hour = {$seedBonusResult['seed_points']}, seedbonus = seedbonus + $all_bonus, seed_points_updated_at = '$updatedAt' where id = $uid limit 1";
+//            do_log("$bonusLog, query: $sql");
+//            NexusDB::statement($sql);
+            $seedPointsUpdates[] = sprintf("when %d then ifnull(seed_points, 0) + %f", $uid, $seed_points);
+            $seedPointsPerHourUpdates[] = sprintf("when %d then %f", $uid, $seedBonusResult['seed_points']);
+            $seedBonusUpdates[] = sprintf("when %d then seedbonus + %f", $uid, $all_bonus);
             if ($fd) {
                 $log = sprintf(
                     '%s|%s|%s|%s|%s|%s|%s|%s',
@@ -126,16 +147,28 @@ class CalculateUserSeedBonus implements ShouldQueue
                     $userInfo['seed_points'], number_format($seed_points, 1, '.', ''),  number_format($userInfo['seed_points'] + $seed_points, 1, '.', ''),
                     $userInfo['seedbonus'], number_format($all_bonus, 1, '.', ''),  number_format($userInfo['seedbonus'] + $all_bonus, 1, '.', '')
                 );
-                fwrite($fd, $log . PHP_EOL);
+//                fwrite($fd, $log . PHP_EOL);
+                $logStr .= $log . PHP_EOL;
             } else {
                 do_log("logFile: $logFile is not writeable!", 'error');
             }
         }
+        $nowStr = now()->toDateTimeString();
+        $sql = sprintf(
+            "update users set seed_points = case id %s end, seed_points_per_hour = case id %s end, seedbonus = case id %s end, seed_points_updated_at = '%s' where id in (%s)",
+            implode(" ", $seedPointsUpdates), implode(" ", $seedPointsPerHourUpdates), implode(" ", $seedBonusUpdates), $nowStr, $idStr
+        );
+        $result = NexusDB::statement($sql);
         if ($delIdRedisKey) {
             NexusDB::cache_del($this->idRedisKey);
         }
+        fwrite($fd, $logStr);
         $costTime = time() - $beginTimestamp;
-        do_log("$logPrefix, [DONE], cost time: $costTime seconds");
+        do_log(sprintf(
+            "$logPrefix, [DONE], update user count: %s, result: %s, cost time: %s seconds",
+            count($seedPointsUpdates), var_export($result, true), $costTime
+        ));
+        do_log("$logPrefix, sql: $sql", "debug");
     }
 
     /**

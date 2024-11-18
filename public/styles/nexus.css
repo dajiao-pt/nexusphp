@@ -71,3 +71,6 @@ img.hitandrun {
 .codemain>pre {
     margin: 0;
 }
+.word-break-all {
+    word-break: break-all;
+}

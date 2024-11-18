@@ -40,10 +40,12 @@ use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use GeoIp2\Database\Reader;
+use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -59,6 +61,7 @@ use NexusPlugin\Permission\Models\Role;
 use NexusPlugin\PostLike\PostLikeRepository;
 use NexusPlugin\StickyPromotion\Models\StickyPromotion;
 use NexusPlugin\StickyPromotion\Models\StickyPromotionParticipator;
+use NexusPlugin\Tracker\TrackerRepository;
 use NexusPlugin\Work\Models\RoleWork;
 use NexusPlugin\Work\WorkRepository;
 use PhpIP\IP;
@@ -98,7 +101,8 @@ class Test extends Command
      */
     public function handle()
     {
-        CleanupRepository::checkQueueFailedJobs();
+        $result = \Nexus\Plugin\Plugin::listEnabled();
+        dd($result);
     }
 
 }
