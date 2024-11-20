@@ -116,6 +116,7 @@ class SeedBoxRepository extends BaseRepository
     public function delete($id, $uid)
     {
         $this->clearCache();
+        publish_model_event("seed_box_record_deleted", $id);
         return SeedBoxRecord::query()->whereIn('id', Arr::wrap($id))->where('uid', $uid)->delete();
     }
 
