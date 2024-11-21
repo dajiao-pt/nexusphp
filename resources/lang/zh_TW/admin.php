@@ -118,6 +118,8 @@ return [
         ],
         'seed_box_record' => [
             'toggle_status' => '更改狀態',
+            'check_modal_btn' => '檢測',
+            'check_modal_header' => '檢測 IP 是否為 SeedBox',
         ],
         'tag' => [
             'detach_torrents' => '分離所有種子',

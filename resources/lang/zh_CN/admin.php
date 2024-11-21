@@ -116,6 +116,8 @@ return [
         ],
         'seed_box_record' => [
             'toggle_status' => '更改状态',
+            'check_modal_btn' => '检测',
+            'check_modal_header' => '检测 IP 是否为 SeedBox',
         ],
         'tag' => [
             'detach_torrents' => '分离所有种子',

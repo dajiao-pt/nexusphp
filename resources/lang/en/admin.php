@@ -118,6 +118,8 @@ return [
         ],
         'seed_box_record' => [
             'toggle_status' => 'Change status',
+            'check_modal_btn' => 'Check',
+            'check_modal_header' => 'Detect if IP is SeedBox',
         ],
         'tag' => [
             'detach_torrents' => 'Detach all torrents',

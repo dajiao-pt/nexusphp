@@ -857,7 +857,7 @@ function do_action($name, ...$args)
     return $hook->doAction(...func_get_args());
 }
 
-function isIPSeedBoxFromASN($ip): bool
+function isIPSeedBoxFromASN($ip, $exceptionWhenYes = false): bool
 {
    try {
        static $reader;
@@ -875,14 +875,18 @@ function isIPSeedBoxFromASN($ip): bool
            return false;
        }
        $row = \Nexus\Database\NexusDB::getOne("seed_box_records", "asn = $asn", "id");
-       return !empty($row);
    } catch (\Throwable $throwable) {
        do_log("ip: $ip, error: " . $throwable->getMessage(), "error");
        return false;
    }
+   $result = !empty($row);
+   if ($result && $exceptionWhenYes) {
+       throw new \App\Exceptions\SeedBoxYesException($row['id']);
+   }
+   return $result;
 }
 
-function isIPSeedBox($ip, $uid, $withoutCache = false): bool
+function isIPSeedBox($ip, $uid, $withoutCache = false, $exceptionWhenYes = false): bool
 {
     $key = "nexus_is_ip_seed_box:ip:$ip:uid:$uid";
     $cacheData = \Nexus\Database\NexusDB::cache_get($key);
@@ -891,7 +895,7 @@ function isIPSeedBox($ip, $uid, $withoutCache = false): bool
         return (bool)$cacheData;
     }
     //check from asn
-    $res = isIPSeedBoxFromASN($ip);
+    $res = isIPSeedBoxFromASN($ip, $exceptionWhenYes);
     if (!empty($res)) {
         \Nexus\Database\NexusDB::cache_put($key, 1, 300);
         do_log("$key, get result from asn, true");
@@ -920,6 +924,9 @@ function isIPSeedBox($ip, $uid, $withoutCache = false): bool
     if (!empty($res)) {
         \Nexus\Database\NexusDB::cache_put($key, 1, 300);
         do_log("$key, get result from admin, true");
+        if ($exceptionWhenYes) {
+            throw new \App\Exceptions\SeedBoxYesException($res[0]['id']);
+        }
         return true;
     }
     if ($uid !== null) {
@@ -931,6 +938,9 @@ function isIPSeedBox($ip, $uid, $withoutCache = false): bool
         if (!empty($res)) {
             \Nexus\Database\NexusDB::cache_put($key, 1, 300);
             do_log("$key, get result from user, true");
+            if ($exceptionWhenYes) {
+                throw new \App\Exceptions\SeedBoxYesException($res[0]['id']);
+            }
             return true;
         }
     }
@@ -1312,4 +1322,14 @@ function publish_model_event(string $event, int $id): void
 function convertNamespaceToSnake(string $str): string
 {
     return str_replace(["\\", "::"], ["_", "."], $str);
+}
+
+function get_user_locale(int $uid): string
+{
+    $sql = "select language.site_lang_folder from useers inner join language on users.lang = language.id where users.id = $uid limit 1";
+    $result = \Nexus\Database\NexusDB::select($sql);
+    if (empty($result) || empty($result['site_lang_folder'])) {
+        return "en";
+    }
+    return \App\Http\Middleware\Locale::$languageMaps[$result['site_lang_folder']] ?? 'en';
 }
