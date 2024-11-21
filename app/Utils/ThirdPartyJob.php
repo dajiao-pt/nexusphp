@@ -3,7 +3,6 @@
 namespace App\Utils;
 
 use App\Jobs\BuyTorrent;
-use http\Exception\InvalidArgumentException;
 use Illuminate\Support\Facades\Queue;
 use Nexus\Database\NexusDB;
 use Nexus\Database\NexusLock;
@@ -31,7 +30,7 @@ final class ThirdPartyJob {
                 $successCount++;
                 match ($data['name']) {
                     self::JOB_BUY_TORRENT => self::enqueueJobBuyTorrent($data),
-                    default => throw new InvalidArgumentException("invalid name: {$data['name']}")
+                    default => throw new \InvalidArgumentException("invalid name: {$data['name']}")
                 };
             } else {
                 do_log(sprintf("%s no name, skip", $item), "error");
