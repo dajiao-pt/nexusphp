@@ -100,6 +100,16 @@ class SeedBoxRecordResource extends Resource
                     ->label(__('label.seed_box_record.status')),
             ])
             ->filters([
+                Tables\Filters\Filter::make('id')
+                    ->form([
+                        Forms\Components\TextInput::make('id')
+                            ->label('ID')
+                            ->placeholder('ID')
+                        ,
+                    ])->query(function (Builder $query, array $data) {
+                        return $query->when($data['id'], fn (Builder $query, $id) => $query->where("id", $id));
+                    })
+                ,
                 Tables\Filters\Filter::make('uid')
                     ->form([
                         Forms\Components\TextInput::make('uid')
