@@ -323,6 +323,7 @@ class UserProfile extends ViewRecord
     {
         return Actions\DeleteAction::make()->using(function () {
             $this->getRep()->destroy($this->record->id);
+            return redirect(self::$resource::getUrl('index'));
         });
     }
 
