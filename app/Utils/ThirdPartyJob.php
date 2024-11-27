@@ -47,8 +47,8 @@ final class ThirdPartyJob {
         if (NexusDB::redis()->set($key, now()->toDateTimeString(), ['nx', 'ex' => 3600])) {
             $value = [
                 'name' => self::JOB_BUY_TORRENT,
-                'userId' => $userId,
-                'torrentId' => $torrentId,
+                'user_id' => $userId,
+                'torrent_id' => $torrentId,
             ];
             NexusDB::redis()->rPush(self::$queueKey, json_encode($value));
             do_log("success addBuyTorrent: $key", "debug");
