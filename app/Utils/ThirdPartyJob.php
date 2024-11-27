@@ -59,11 +59,11 @@ final class ThirdPartyJob {
 
     private static function enqueueJobBuyTorrent(array $params): void
     {
-        if (!empty($params['userId']) && !empty($params['torrentId'])) {
-            $job = new BuyTorrent($params['userId'], $params['torrentId']);
+        if (!empty($params['user_id']) && !empty($params['torrent_id'])) {
+            $job = new BuyTorrent($params['user_id'], $params['torrent_id']);
             Queue::push($job);
         } else {
-            do_log("no userId or torrentId: " . json_encode($params), "error");
+            do_log("no user_id or torrent_id: " . json_encode($params), "error");
         }
     }
 }
