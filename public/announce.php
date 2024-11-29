@@ -469,6 +469,8 @@ if (!isset($self))
                 //disable download
                 (new \App\Repositories\UserRepository())->updateDownloadPrivileges(null, $userid, 'no', 'announce_paid_torrent_too_many_times');
             }
+            //already fail, add fail times
+            $torrentRep->addBuyFailCache($userid, $torrentid);
             warn("purchase fail, please try again later, please make sure you have enough bonus", 300);
         }
         if ($buyStatus == \App\Repositories\TorrentRepository::BUY_STATUS_UNKNOWN) {
