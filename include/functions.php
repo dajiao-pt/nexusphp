@@ -32,8 +32,8 @@ function get_langfolder_cookie($transToLocale = false)
 
 function get_user_lang($user_id)
 {
-	$lang = mysql_fetch_assoc(sql_query("SELECT site_lang_folder FROM language LEFT JOIN users ON language.id = users.lang WHERE language.site_lang=1 AND users.id= ". sqlesc($user_id) ." LIMIT 1")) or sqlerr(__FILE__, __LINE__);
-	return $lang['site_lang_folder'];
+	$lang = mysql_fetch_assoc(sql_query("SELECT site_lang_folder FROM language LEFT JOIN users ON language.id = users.lang WHERE language.site_lang=1 AND users.id= ". sqlesc($user_id) ." LIMIT 1"));
+	return $lang['site_lang_folder'] ?: 'en';
 }
 
 function get_langfile_path($script_name ="", $target = false, $lang_folder = "")
