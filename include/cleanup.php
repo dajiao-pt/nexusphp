@@ -258,8 +258,6 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	$deadtime = deadtime();
 	$deadtime = date("Y-m-d H:i:s",$deadtime);
 	sql_query("DELETE FROM peers WHERE last_action < ".sqlesc($deadtime)) or sqlerr(__FILE__, __LINE__);
-    //rest seed_points_per_hour
-    sql_query("update users set seed_points_per_hour = 0 where seed_points_updated_at < " . sqlesc($deadtime));
 	$log = 'update peer status';
 	do_log($log);
 	if ($printProgress) {
@@ -302,6 +300,10 @@ function docleanup($forceAll = 0, $printProgress = false) {
 //			sql_query($sql);
 //		}
 //	}
+
+    //rest seed_points_per_hour
+    $seedPointsUpdatedAtMin = $carbonNow->subSeconds(2*intval($autoclean_interval_one))->toDateTimeString();
+    sql_query("update users set seed_points_per_hour = 0 where seed_points_updated_at < " . sqlesc($seedPointsUpdatedAtMin));
 
 	\App\Repositories\CleanupRepository::runBatchJobCalculateUserSeedBonus($requestId);
 
