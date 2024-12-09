@@ -249,7 +249,8 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	set_time_limit(0);
 	ignore_user_abort(1);
 	$now = time();
-	$nowStr = \Carbon\Carbon::now()->toDateTimeString();
+    $carbonNow = \Carbon\Carbon::now();
+	$nowStr = $carbonNow->toDateTimeString();
 	do_log("start docleanup(), forceAll: $forceAll, printProgress: $printProgress, now: $now, " . date('Y-m-d H:i:s', $now));
 
 //Priority Class 1: cleanup every 15 mins
@@ -257,6 +258,8 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	$deadtime = deadtime();
 	$deadtime = date("Y-m-d H:i:s",$deadtime);
 	sql_query("DELETE FROM peers WHERE last_action < ".sqlesc($deadtime)) or sqlerr(__FILE__, __LINE__);
+    //rest seed_points_per_hour
+    sql_query("update users set seed_points_per_hour = 0 where seed_points_updated_at < " . sqlesc($deadtime));
 	$log = 'update peer status';
 	do_log($log);
 	if ($printProgress) {
