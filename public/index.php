@@ -170,6 +170,8 @@ JS;
 	if ($CURUSER['hidehb'] != 'yes' && $showhelpbox_main =='yes')
 		print("<input type='submit' class='btn' name='toguest' value=\"".$lang_index['sumbit_to_guest']."\" />");
 	print("<input type='reset' class='btn' value=\"".$lang_index['submit_clear']."\" /> <input type='hidden' name='sent' value='yes' /><input type='hidden' name='type' value='shoutbox' />");
+	print("<input type='button' id='shbox_help' class='btn' value='帮助'></input>");
+	print("<script>\$('shbox_help').onclick=function(){\$('shbox_text').value='打胶妹 帮助';\$('hbsubmit').click()}</script>");
 	print('</div>');
     print(smile_row("shbox","shbox_text"));
 	print("</form></td></tr></table>");

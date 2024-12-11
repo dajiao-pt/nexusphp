@@ -473,7 +473,7 @@ ul.menu
 }
 ul.menu li
 {
-	display: inline;
+	display: inline-block;
 	margin-left: 0px;
 	margin-bottom: 0px;
 }
@@ -493,6 +493,7 @@ ul.menu li a
 	font-variant: normal;
 	text-align: center;
 	display: inline-block;
+	transition: .2s linear
 }
 ul.menu li a:link
 {
@@ -510,17 +511,35 @@ ul.menu li a:active
 {
 	color: #ffffff;
 }
-ul.menu li.selected a
+ul.menu>li.selected>a
 {
 	background-color: #336633;
 	background-image: none;
 	border: 1px solid #00aa00;
 	color: #ffffff;
 }
-ul.menu li.selected a:hover
+ul.menu>li.selected>a:hover
 {
 	background-color: #336633;
 }
+
+ul.menu li:hover ul{
+	display: block;
+}
+
+ul.menu li ul{
+	margin: 0;
+	padding: 0;
+	display: none;
+	position: absolute;
+}
+
+ul.menu li ul li{
+	margin: 0;
+	padding: 0;
+	display: block;
+}
+
 .listitem
 {
 	margin-left: 10px;
@@ -636,3 +655,31 @@ A.Peasant_Name:visited{color: #708090}
 .recommended{color:#820084}
 .new{color:#ff0000}
 .striking{color:#ff0000}
+
+.nav-btn {
+    background: #006633;
+    border: .5px solid var(--theme-primary-sys-primary);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-right: 4px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    color: white;
+}
+
+.nav-btn:link{
+	color:#fff;
+	text-decoration: none;
+}
+
+.nav-btn:visited{
+	color:#fff;
+	text-decoration: none;
+}
+.nav-btn:hover
+{
+	text-decoration: underline;
+	background-color: #008c00
+}

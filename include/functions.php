@@ -2295,6 +2295,10 @@ function menu ($selected = "home") {
 		$selected = "forums";
 	}elseif (preg_match("/torrents/i", $script_name)) {
 		$selected = "torrents";
+		$url = $_SERVER["REQUEST_URI"];
+		if (preg_match("/tag_id=3/i", $url)){
+			$selected = "official_torrents";
+		}
 	}elseif (preg_match("/special/i", $script_name)) {
 		$selected = "special";
 	}elseif (preg_match("/offers/i", $script_name) OR preg_match("/offcomment/i", $script_name)) {
@@ -2331,19 +2335,32 @@ function menu ($selected = "home") {
         $specialSectionName = get_searchbox_value(get_setting('main.specialcat'), 'section_name');
         print ("<ul id=\"mainmenu\" class=\"menu\">");
         print ("<li" . ($selected == "home" ? " class=\"selected\"" : "") . "><a href=\"index.php\">" . $lang_functions['text_home'] . "</a></li>");
-        if ($enableextforum != 'yes')
-            print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
-        else
+        if ($enableextforum != 'yes'){
+			print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
+		} else {
             print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"" . $extforumurl."\" target=\"_blank\">".$lang_functions['text_forums']."</a></li>");
-        print ("<li" . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub-menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a></li>");
-        if ($enablespecial == 'yes' && user_can('view_special_torrent'))
+		}
+		print ("<li " . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub_menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a>"
+		."<ul class='sub_menu'>
+		<li><a href=\"torrents.php?cat=401\" >".$lang_functions['text_torrents_movies']."</a></li>
+		<li><a href=\"torrents.php?cat=402\" >".$lang_functions['text_torrents_tvseries']."</a></li>
+		<li><a href=\"torrents.php?cat=405\" >".$lang_functions['text_torrents_anime']."</a></li>
+		<li><a href=\"torrents.php?cat=403\" >".$lang_functions['text_torrents_tvshows']."</a></li>
+		<li><a href=\"torrents.php?cat=404\" >".$lang_functions['text_torrents_doc']."</a></li>
+		<li><a href=\"torrents.php?cat=413\" >".$lang_functions['text_torrents_book']."</a></li>
+		<li><a href=\"torrents.php?cat=411\" >".$lang_functions['text_torrents_comic']."</a></li>
+		<li><a href=\"torrents.php?cat=409\" >".$lang_functions['text_torrents_music']."</a></li>
+		<li><a href=\"torrents.php?cat=412\" >".$lang_functions['text_torrents_audiobook']."</a></li>
+		</ul></li>");
+		print ("<li " . ($selected == "official_torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php?tag_id=3\" rel='sub_menu'>".$lang_functions['text_official_torrents']."</a>");
+		if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
         if ($enableoffer == 'yes')
             print ("<li" . ($selected == "offers" ? " class=\"selected\"" : "") . "><a href=\"offers.php\">".$lang_functions['text_offers']."</a></li>");
         if ($enablerequest == 'yes')
             print ("<li" . ($selected == "requests" ? " class=\"selected\"" : "") . "><a href=\"viewrequests.php\">".$lang_functions['text_request']."</a></li>");
         print ("<li" . ($selected == "upload" ? " class=\"selected\"" : "") . "><a href=\"upload.php\">".$lang_functions['text_upload']."</a></li>");
-        print ("<li" . ($selected == "subtitles" ? " class=\"selected\"" : "") . "><a href=\"subtitles.php\">".$lang_functions['text_subtitles']."</a></li>");
+        // print ("<li" . ($selected == "subtitles" ? " class=\"selected\"" : "") . "><a href=\"subtitles.php\">".$lang_functions['text_subtitles']."</a></li>");
         //	print ("<li" . ($selected == "usercp" ? " class=\"selected\"" : "") . "><a href=\"usercp.php\">".$lang_functions['text_user_cp']."</a></li>");
         if (user_can('topten')) {
             print ("<li" . ($selected == "topten" ? " class=\"selected\"" : "") . "><a href=\"topten.php\">".$lang_functions['text_top_ten']."</a></li>");
@@ -2351,8 +2368,10 @@ function menu ($selected = "home") {
         if (user_can('log')) {
             print ("<li" . ($selected == "log" ? " class=\"selected\"" : "") . "><a href=\"log.php\">".$lang_functions['text_log']."</a></li>");
         }
-        print ("<li" . ($selected == "rules" ? " class=\"selected\"" : "") . "><a href=\"rules.php\">".$lang_functions['text_rules']."</a></li>");
-        print ("<li" . ($selected == "faq" ? " class=\"selected\"" : "") . "><a href=\"faq.php\">".$lang_functions['text_faq']."</a></li>");
+        print ("<li" . ($selected == "rules" ? " class=\"selected\"" : "") . "><a href=\"rules.php\" rel='sub_menu'>".$lang_functions['text_rules']."</a>".
+		"<ul class='sub_menu'>
+		<li><a href=\"faq.php\" >".$lang_functions['text_faq']."</a></li>
+		</ul></li>");
         if (user_can('staffmem')) {
             print ("<li" . ($selected == "staff" ? " class=\"selected\"" : "") . "><a href=\"staff.php\">".$lang_functions['text_staff']."</a></li>");
         }
@@ -2449,10 +2468,17 @@ function get_style_highlight()
 	return $hltr;
 }
 
+function getOpenHtmlTag_A($link){
+	if($link == ""){
+		return "<a>";
+	}
+	return "<a href='$link'>";
+}
+
 function stdhead($title = "", $msgalert = true, $script = "", $place = "")
 {
 	global $lang_functions;
-	global $CURUSER, $CURLANGDIR, $USERUPDATESET, $iplog1, $oldip, $SITE_ONLINE, $FUNDS, $SITENAME, $SLOGAN, $logo_main, $BASEURL, $offlinemsg,$enabledonation, $staffmem_class, $titlekeywords_tweak, $metakeywords_tweak, $metadescription_tweak, $cssdate_tweak, $deletenotransfertwo_account, $neverdelete_account, $iniupload_main;
+	global $CURUSER, $CURLANGDIR, $USERUPDATESET, $iplog1, $oldip, $SITE_ONLINE, $FUNDS, $SITENAME, $SLOGAN, $logo_main, $banner_img, $banner_link, $background_image, $BASEURL, $offlinemsg,$enabledonation, $staffmem_class, $titlekeywords_tweak, $metakeywords_tweak, $metadescription_tweak, $cssdate_tweak, $deletenotransfertwo_account, $neverdelete_account, $iniupload_main;
 	global $tstart;
 	global $Cache;
 	global $Advertisement;
@@ -2555,13 +2581,26 @@ foreach (\Nexus\Nexus::getAppendHeaders() as $value) {
 <script type="text/javascript" src="js/jquery-1.12.4.min.js<?php echo $cssupdatedate?>"></script>
 <script type="text/javascript">jQuery.noConflict();</script>
 <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js<?php echo $cssupdatedate?>"></script>
-</head>
+</head>	
+<?php
+if ($background_image == "")
+{
+?>
 <body>
+<?php
+}
+else
+{
+?>
+<body style="background-image:url(<?php echo $background_image?>);">
+<?php
+}
+?>
 <table class="head" cellspacing="0" cellpadding="0" align="center" style="width: <?php echo isset($GLOBALS['CURUSER']) ? CONTENT_WIDTH + 28.66 : CONTENT_WIDTH ?>px">
 	<tr>
 		<td class="clear">
 <?php
-if ($logo_main == "")
+if ($banner_img == "")
 {
 ?>
 			<div class="logo"><?php echo htmlspecialchars($SITENAME)?></div>
@@ -2571,7 +2610,7 @@ if ($logo_main == "")
 else
 {
 ?>
-			<div class="logo_img"><img src="<?php echo $logo_main?>" alt="<?php echo htmlspecialchars($SITENAME)?>" title="<?php echo htmlspecialchars($SITENAME)?> - <?php echo htmlspecialchars($SLOGAN)?>" /></div>
+			<div class="logo_img"><?php echo getOpenHtmlTag_A($banner_link)?><img src="<?php echo $banner_img?>" alt="<?php echo htmlspecialchars($SITENAME)?>" title="<?php echo htmlspecialchars($SITENAME)?> - <?php echo htmlspecialchars($SLOGAN)?>" /></a></div>
 <?php
 }
 ?>
@@ -2584,7 +2623,7 @@ else
 		}
 }
 if ($enabledonation == 'yes'){?>
-			<a href="donate.php"><img src="<?php echo get_forum_pic_folder()?>/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
+			<a style="margin-left: -100px;position: absolute;" href="donate.php"><img src="<?php echo get_forum_pic_folder()?>/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
 <?php
 }
 ?>
@@ -2659,29 +2698,54 @@ else {
 
 <table id="info_block" cellpadding="4" cellspacing="0" border="0" width="100%"><tr>
 	<td><table width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
+		<td class="bottom" align="left"><image src='<?php echo get_user_avatar()?>' style="width:50px;border-radius:25px;margin-right:3px" /></td>
 		<td class="bottom" align="left">
-            <span class="medium">
-                <?php echo $lang_functions['text_welcome_back'] ?>, <?php echo get_username($CURUSER['id'])?>
-                [<a href="logout.php"><?php echo $lang_functions['text_logout'] ?></a>]
-                [<a href="usercp.php"><?php echo $lang_functions['text_user_cp'] ?></a>]
-                <?php if (get_user_class() >= UC_MODERATOR) { ?> [<a href="staffpanel.php"><?php echo $lang_functions['text_staff_panel'] ?></a>] <?php }?>
-                <?php if (get_user_class() >= UC_SYSOP) { ?> [<a href="settings.php"><?php echo $lang_functions['text_site_settings'] ?></a>]<?php } ?>
-                [<a href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0"><?php echo $lang_functions['text_bookmarks'] ?></a>]
-                <font class = 'color_bonus'><?php echo $lang_functions['text_bonus'] ?></font>[<a href="mybonus.php"><?php echo $lang_functions['text_use'] ?></a>]: <?php echo number_format($CURUSER['seedbonus'], 1)?>
-                <?php if($attendance){ printf(' <a href="attendance.php" class="">'.$lang_functions['text_attended'].'</a>', $attendance->points, $CURUSER['attendance_card']); }else{ printf(' <a href="attendance.php" class="faqlink">%s</a>', $lang_functions['text_attendance']);}?>
-                <a href="medal.php">[<?php echo nexus_trans('medal.label')?>]</a>
-                <a href="task.php">[<?php echo nexus_trans('exam.type_task')?>]</a>
-                <font class = 'color_invite'><?php echo $lang_functions['text_invite'] ?></font>[<a href="invite.php?id=<?php echo $CURUSER['id']?>"><?php echo $lang_functions['text_send'] ?></a>]: <?php echo sprintf('%s(%s)', $CURUSER['invites'], \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('invitee', '')->where('expired_at', '>', now())->count())?>
-                <?php if(get_user_class() >= \App\Models\User::getAccessAdminClassMin()) printf('[<a href="%s" target="_blank">%s</a>]', nexus_env('FILAMENT_PATH', 'nexusphp'), $lang_functions['text_management_system'])?>
-                <br />
-	            <font class="color_ratio"><?php echo $lang_functions['text_ratio'] ?></font> <?php echo $ratio?>
-                <font class='color_uploaded'><?php echo $lang_functions['text_uploaded'] ?></font> <?php echo mksize($CURUSER['uploaded'])?>
-                <font class='color_downloaded'> <?php echo $lang_functions['text_downloaded'] ?></font> <?php echo mksize($CURUSER['downloaded'])?>
-                <font class='color_active'><?php echo $lang_functions['text_active_torrents'] ?></font> <img class="arrowup" alt="Torrents seeding" title="<?php echo $lang_functions['title_torrents_seeding'] ?>" src="pic/trans.gif" /><?php echo $activeseed?>  <img class="arrowdown" alt="Torrents leeching" title="<?php echo $lang_functions['title_torrents_leeching'] ?>" src="pic/trans.gif" /><?php echo $activeleech?>&nbsp;&nbsp;
-                <font class='color_connectable'><?php echo $lang_functions['text_connectable'] ?></font><?php echo $connectable?> <?php echo maxslots();?>
-                <?php if(\App\Models\HitAndRun::getIsEnabled()) { ?><font class='color_bonus'>H&R: </font> <?php echo sprintf('[<a href="myhr.php">%s</a>]', (new \App\Repositories\HitAndRunRepository())->getStatusStats($CURUSER['id']))?><?php }?>
-                <?php if(\App\Models\Claim::getConfigIsEnabled()) { ?><font class='color_bonus'><?php echo $lang_functions['menu_claim']?></font> <?php echo sprintf('[<a href="claim.php?uid=%s">%s</a>]', $CURUSER['id'], (new \App\Repositories\ClaimRepository())->getStats($CURUSER['id']))?><?php }?>
-            </span>
+            <div class="medium">
+				<div>
+					<!-- 欢迎词和用户名 -->
+					<?php echo get_username($CURUSER['id'])?>
+					<!-- 退出 -->
+					<a class='nav-btn' href="logout.php"><?php echo $lang_functions['text_logout'] ?></a>
+					<font class="color_ratio"><?php echo $lang_functions['text_ratio'] ?></font> <?php echo $ratio?>
+                	<font class='color_uploaded'><?php echo $lang_functions['text_uploaded'] ?></font> <?php echo mksize($CURUSER['uploaded'])?>
+                	<font class='color_downloaded'> <?php echo $lang_functions['text_downloaded'] ?></font> <?php echo mksize($CURUSER['downloaded'])?>
+                	<font class='color_active'><?php echo $lang_functions['title_torrents_seeding'] ?></font>
+					<!-- 正在上传 -->
+					<img class="arrowup" alt="Torrents seeding" title="<?php echo $lang_functions['title_torrents_seeding'] ?>" src="pic/trans.gif" /><?php echo $activeseed?>  
+					<font class='color_active'><?php echo $lang_functions['title_torrents_leeching'] ?></font>
+					<!-- 正在下载 -->
+					<img class="arrowdown" alt="Torrents leeching" title="<?php echo $lang_functions['title_torrents_leeching'] ?>" src="pic/trans.gif" /><?php echo $activeleech?>
+					<!-- 时魔显示 -->
+                	<font class='color_mybonus'><?php echo $lang_functions['text_current_hour_bonus'] ?></font><?php echo number_format(get_hourly_bonus($CURUSER['id']),3) ?>
+					<!-- 可连接和连接数 -->
+					<font class='color_connectable'><?php echo $lang_functions['text_connectable'] ?></font><?php echo $connectable?> <?php echo maxslots();?>
+					<!-- H&R -->
+                	<?php if(\App\Models\HitAndRun::getIsEnabled()) { ?><font class='color_bonus'>H&R: </font> <?php echo sprintf('[<a class="nav-btn" href="myhr.php">%s</a>]', (new \App\Repositories\HitAndRunRepository())->getStatusStats($CURUSER['id']))?><?php }?>
+                	<?php if(\App\Models\Claim::getConfigIsEnabled()) { ?><font class='color_bonus'><?php echo $lang_functions['menu_claim']?></font> <?php echo sprintf('[<a href="claim.php?uid=%s">%s</a>]', $CURUSER['id'], (new \App\Repositories\ClaimRepository())->getStats($CURUSER['id']))?><?php }?>
+				</div>
+				<div style="margin-top:5px">
+					<!-- 控制面板 -->
+					<a class='nav-btn' href="usercp.php"><?php echo $lang_functions['text_user_cp'] ?></a>
+					<!-- 管理组面板 -->
+                	<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="staffpanel.php"><?php echo $lang_functions['text_staff_panel'] ?></a><?php }?>
+					<!-- 打胶妹设置 -->
+					<?php if (get_user_class() >= UC_MODERATOR) { ?><a class='nav-btn' href="cyanbug-chat.php"><?php echo $lang_functions['text_cyanbug_chat_settings'] ?></a><?php }?>
+					<!-- 站点设置 -->
+                	<?php if (get_user_class() >= UC_SYSOP) { ?><a class='nav-btn' href="settings.php"><?php echo $lang_functions['text_site_settings'] ?></a><?php } ?>
+					<!-- 收藏 -->
+                	<a class='nav-btn' href="torrents.php?inclbookmarked=1&amp;allsec=1&amp;incldead=0"><?php echo $lang_functions['text_bookmarks'] ?></a>
+					<!-- 签到信息 -->
+                	<?php if($attendance){ printf(' <a class="nav-btn" href="attendance.php" class="">'.$lang_functions['text_attended'].'</a>', $attendance->points, $CURUSER['attendance_card']); }else{ printf('<a href="attendance.php" class="nav-btn">%s</a>', $lang_functions['text_attendance']);}?>
+					<!-- 魔力相关 -->
+                	<a class='nav-btn' href="mybonus.php"><?php echo ($lang_functions['text_bonus'].$lang_functions['text_use'].":".number_format($CURUSER['seedbonus'], 1)) ?></a>
+					<!-- 勋章 -->
+                	<a class='nav-btn' href="medal.php"><?php echo nexus_trans('medal.label')?></a>
+					<!-- 邀请 -->
+                	<a class='nav-btn' href="invite.php?id=<?php echo $CURUSER['id']?>"><?php echo $lang_functions['text_invite'].$lang_functions['text_send'].':'.sprintf('%s(%s)', $CURUSER['invites'], \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('invitee', '')->where('expired_at', '>', now())->count()) ?></a>
+					<!-- 管理系统 -->
+                	<?php if(get_user_class() >= \App\Models\User::CLASS_ADMINISTRATOR) printf('<a class="nav-btn" href="%s" target="_blank">%s</a>', nexus_env('FILAMENT_PATH', 'nexusphp'), $lang_functions['text_management_system'])?>
+				</div>
+			</div>
         </td>
                 <?php if(SearchBox::isSpecialEnabled() && get_setting('main.enable_global_search') == 'yes'){?>
         <td class="bottom" align="left" style="border: none">

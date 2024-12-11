@@ -64,6 +64,15 @@ class StylesheetsTableSeeder extends Seeder
                 'designer' => 'Xia Zuojie',
                 'comment' => 'Baidu Hi clone',
             ),
+            5 => 
+            array (
+                'id' => 8,
+                'uri' => 'styles/CyanBug/',
+                'name' => 'CyanBug',
+                'addicode' => '',
+                'designer' => 'jinglekang',
+                'comment' => 'Based on BambooGreen',
+            ),
         ));
         
         

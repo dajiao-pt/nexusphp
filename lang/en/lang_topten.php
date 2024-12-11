@@ -26,6 +26,7 @@ $lang_topten = array
 	'col_download_rate' => "Download rate",
 	'text_users' => "Users",
 	'text_torrents' => "Torrents" ,
+	'text_official_torrents' => "OfficialTorrents",
 	'text_countries' => "Countries",
 	'text_peers' => "Peers",
 	'text_community' => "Community",

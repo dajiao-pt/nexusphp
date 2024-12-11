@@ -26,6 +26,7 @@ $lang_topten = array
 	'col_download_rate' => "下載速度",
 	'text_users' => "用戶",
 	'text_torrents' => "種子" ,
+	'text_official_torrents' => "官種",
 	'text_countries' => "國家/地區",
 	'text_peers' => "同伴",
 	'text_community' => "社區",

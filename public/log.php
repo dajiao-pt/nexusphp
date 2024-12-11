@@ -21,9 +21,13 @@ function logmenu($selected = "dailylog"){
 		begin_main_frame();
 		print ("<div id=\"lognav\"><ul id=\"logmenu\" class=\"menu\">");
 		print ("<li" . ($selected == "dailylog" ? " class=selected" : "") . "><a href=\"?action=dailylog\">".$lang_log['text_daily_log']."</a></li>");
+		if(get_user_class() >= UC_MODERATOR){
+			print ("<li" . ($selected == "disabled" ? " class=selected" : "") . "><a href=\"?action=disabled\">".$lang_log['text_disabled_log']."</a></li>");
+		}
 		print ("<li" . ($selected == "chronicle" ? " class=selected" : "") . "><a href=\"?action=chronicle\">".$lang_log['text_chronicle']."</a></li>");
-		if ($showfunbox_main == 'yes')
+		if ($showfunbox_main == 'yes'){
 			print ("<li" . ($selected == "funbox" ? " class=selected" : "") . "><a href=\"?action=funbox\">".$lang_log['text_funbox']."</a></li>");
+		}
 		print ("<li" . ($selected == "news" ? " class=selected" : "") . "><a href=\"?action=news\">".$lang_log['text_news']."</a></li>");
 		print ("<li" . ($selected == "poll" ? " class=selected" : "") . "><a href=\"?action=poll\">".$lang_log['text_poll']."</a></li>");
 		print ("</ul></div>");
@@ -76,12 +80,12 @@ function edititem($title, $action, $id){
 }
 
 $action = isset($_POST['action']) ? htmlspecialchars($_POST['action']) : (isset($_GET['action']) ? htmlspecialchars($_GET['action']) : '');
-$allowed_actions = array("dailylog","chronicle","funbox","news","poll");
+$allowed_actions = array("dailylog","disabled","chronicle","funbox","news","poll");
 if (!$action)
 	$action='dailylog';
-if (!in_array($action, $allowed_actions))
-stderr($lang_log['std_error'], $lang_log['std_invalid_action']);
-else {
+if (!in_array($action, $allowed_actions)){
+	stderr($lang_log['std_error'], $lang_log['std_invalid_action']);
+} else {
 	switch ($action){
 	case "dailylog":
 		stdhead($lang_log['head_site_log']);
@@ -148,6 +152,78 @@ else {
 
 		print($lang_log['time_zone_note']);
 
+		stdfoot();
+		die;
+		break;
+	case "disabled":
+		if(get_user_class() < UC_MODERATOR){
+			stderr($lang_log['std_error'], $lang_log['std_permission_denied']);
+		}
+		// 标题
+		stdhead($lang_log['head_disabled_log']);
+		// 查询条件
+		$query = mysql_real_escape_string($q);
+		$search = $_GET["search"] ?? '';
+
+		$addparam = "";
+		$wherea = "where enabled = 'no' ";
+		$addparam = ($wherea ? "search=".rawurlencode($search)."&" : "");
+		if($query) {
+			switch ($search) {
+				case "id": $wherea.=" and id = ".sqlesc($query); break;
+				case "username": $wherea.=" and  username = ".sqlesc($query); break;
+				case "email": $wherea.=" and email = ".sqlesc($query); break;
+			}
+			$addparam .= "query=".rawurlencode($query)."&";
+		}
+
+		logmenu('disabled');
+		$opt = array ('id' => 'UID', 'username' => '用户名', 'email' => '邮箱账号');
+		searchtable($lang_log['text_search_disabled_log'], 'disabled',$opt);
+
+		$res = sql_query("SELECT COUNT(*) FROM users ".$wherea);
+		$row = mysql_fetch_array($res);
+		$count = $row[0];
+
+		$perpage = 10;
+	
+		list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, "log.php?action=disabled&".$addparam);
+	
+		$res = sql_query("SELECT users.id,users.username,email,operator,reason,updated_at ".
+			"FROM users LEFT JOIN user_ban_logs ubl ON users.id = ubl.uid ".
+			"$wherea ORDER BY id DESC $limit") or sqlerr(__FILE__, __LINE__);
+		if (mysql_num_rows($res) == 0){
+			print($lang_log['text_log_empty']);
+		}
+		else {
+			//echo $pagertop;
+			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
+			print("<tr><td class=colhead align=center>ID</td>"
+			."<td class=colhead align=left>用户名</td>"
+			."<td class=colhead align=left>邮箱账号</td>"
+			."<td class=colhead align=left>操作人</td>"
+			."<td class=colhead align=left>原因</td>"
+			."<td class=colhead align=left>封禁日期</td>"
+			."</tr>\n");
+			while ($arr = mysql_fetch_assoc($res))
+			{
+				$operator_name = 'system';
+				if($arr['operator']){
+					$user = get_user_row($arr['operator']);
+					$operator_name = $user['username'];
+				}
+				print("<tr><td class=\"rowfollow nowrap\" align=center>".$arr['id']."</td>
+				<td class=rowfollow align=left>".htmlspecialchars($arr['username'])."</td>
+				<td class=rowfollow align=left>".htmlspecialchars($arr['email'])."</td>
+				<td class=rowfollow align=left>".htmlspecialchars($operator_name)."</td>
+				<td class=rowfollow align=left>".htmlspecialchars($arr['reason'])."</td>
+				<td class=rowfollow align=left>".htmlspecialchars($arr['updated_at'])."</td>
+				</tr>\n");
+			}
+			print("</table>");
+			echo $pagerbottom;
+		}
+		print($lang_log['time_zone_note']);
 		stdfoot();
 		die;
 		break;
