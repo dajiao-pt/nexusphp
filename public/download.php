@@ -141,7 +141,11 @@ if (strlen($CURUSER['passkey']) != 32) {
 }
 $trackerReportAuthKey = $torrentRep->getTrackerReportAuthKey($id, $CURUSER['id'], true);
 $dict = \Rhilip\Bencode\Bencode::load($fn);
-$dict['announce'] = $ssl_torrent . $base_announce_url . "?passkey=" . $CURUSER['passkey'];
+if (isset($_SERVER['HTTP_TRACKER_ANNOUNCE_URL'])) {
+    $dict['announce'] = $ssl_torrent . $_SERVER['HTTP_TRACKER_ANNOUNCE_URL'] . "?passkey=" . $CURUSER['passkey'];
+} else {
+    $dict['announce'] = $ssl_torrent . $base_announce_url . "?passkey=" . $CURUSER['passkey'];
+}
 do_log(sprintf("[ANNOUNCE_URL], user: %s, torrent: %s, url: %s", $CURUSER['id'] ?? '', $id, $dict['announce']));
 /**
  * does not support multi-tracker
