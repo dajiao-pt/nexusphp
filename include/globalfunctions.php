@@ -669,22 +669,21 @@ function get_tracker_schema_and_host($combine = false): array|string
     ) {
         $log .= ", c_secure_tracker_ssl = base64('yeah'): " . base64("yeah") . ", or not empty https_announce_urls, or isHttps()";
         $tracker_ssl = true;
+        $ssl_torrent = "https://";
     }  else {
         $tracker_ssl = false;
+        $ssl_torrent = "http://";
     }
     $log .= ", tracker_ssl: $tracker_ssl";
 
-    if ($tracker_ssl == true){
-        $ssl_torrent = "https://";
-        if ($https_announce_urls[0] != "") {
-            $log .= ", https_announce_urls not empty, use it";
-            $base_announce_url = $https_announce_urls[0];
-        } else {
-            $log .= ", https_announce_urls empty, use announce_urls[0]";
-            $base_announce_url = $announce_urls[0];
-        }
+    if (isset($_SERVER['HTTP_TRACKER_ANNOUNCE_URL'])) {
+        $log .= ", HTTP_TRACKER_ANNOUNCE_URL not empty, use HTTP_TRACKER_ANNOUNCE_URL";
+        $base_announce_url = $_SERVER['HTTP_TRACKER_ANNOUNCE_URL'];
+    } else if ($tracker_ssl == true && $https_announce_urls[0] != ""){
+        $log .= ", https_announce_urls not empty, use it";
+        $base_announce_url = $https_announce_urls[0];
     } else {
-        $ssl_torrent = "http://";
+        $log .= ", https_announce_urls empty, or not use https, use announce_urls[0]";
         $base_announce_url = $announce_urls[0];
     }
     do_log($log);
